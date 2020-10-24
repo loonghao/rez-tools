@@ -1,3 +1,2 @@
 pyyaml>=5.0
 clik>=7.0
-addict>=2.0
