@@ -13,7 +13,6 @@
 <img src="https://pepy.tech/badge/rez-tools" alt="Downloads"></a>
 <img src="https://img.shields.io/pypi/l/rez-tools" alt="License"></a>
 <img src="https://img.shields.io/pypi/format/rez-tools" alt="pypi format"></a>
-<a href="https://discord.gg/AnxSa6n">
 <a href="https://github.com/loonghao/rez-tools/graphs/commit-activity">
 <img src="https://img.shields.io/badge/Maintained%3F-yes-green.svg" alt="Maintenance"></a>
 
