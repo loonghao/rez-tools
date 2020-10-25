@@ -1,0 +1,6 @@
+command: python
+short_help: Python3.
+requires:
+  - python-3
+  - cmake
+  - conan

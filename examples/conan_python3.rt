@@ -1,0 +1,6 @@
+command: conan
+
+requires:
+  - python-3
+  - conan
+  - cmake

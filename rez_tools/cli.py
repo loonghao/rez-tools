@@ -65,6 +65,7 @@ class ToolGroup(click.Group):
 
     def populate_plugins(self, ctx):
         """Populate the class variable that holds all the dynamically-loaded
+
         plugins. Run lazily the first time list_plugins or get_command are
         called.
 
@@ -72,7 +73,8 @@ class ToolGroup(click.Group):
             ctx (click.Context): The current context.
 
         Returns:
-            dict: the plugins dict
+            dict: the plugins dict.
+
         """
         # lazily load the plugins list
         if self.plugins is None:
@@ -233,8 +235,4 @@ class ToolGroup(click.Group):
     context_settings={
         'help_option_names': ['-h', '--help']})
 def cli():
-    print('ffffffffff')
-
-
-if __name__ == '__main__':
-    cli()
+    pass
