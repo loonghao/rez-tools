@@ -1,7 +1,9 @@
 import os
 
+# `rt` will search all tools from the below paths.
 tool_paths = [
     os.path.normpath(os.path.expanduser("~/packages")),
-    r"C:\Users\hao.long\PycharmProjects\rez-tools\tools"
+    os.path.dirname(__file__)
 ]
+
 extension = ".rt"

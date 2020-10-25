@@ -23,16 +23,49 @@
 </p>
 
 
-
-
 A suite tool command line for [rez](https://github.com/nerdvegas/rez).
 
 <img src="https://i.imgur.com/rECBBUD.jpeg" alt="logo"></a>**This tool requires you to install [rez](https://github.com/nerdvegas/rez/wiki/Installation) in advance.**
 
 
-# Installation Via Pip
+Installing
+----------
+You can install via pip.
+
 ```cmd
 pip install rez-tools
+```
+
+or through clone from Github.
+```git exclude
+git clone https://github.com/loonghao/rez-tools.git
+```
+Install package.
+```cmd
+cd rez-tools
+```
+```cmd
+python setup.py install
+```
+
+QuickStart
+----------
+```cmd
+> set REZ_TOOL_CONFIG=C:\Users\hao.long\PycharmProjects\rez-tools\examples\reztoolsconfig.py
+> rt
+```
+`rez-tools` will find all tools via `reztoolsconfig:tool_paths`
+```
+Usage: -c [OPTIONS] PLUGIN [PLUGIN OPTIONS]
+
+Options:
+  -h, --help  Show this message and exit.
+
+Plugin Commands:
+  cmke_gui       Camke GUi.
+  conan_python2  A rez plugin - conan_python2.
+  conan_python3  A rez plugin - conan_python3.
+  python         Python3.
 ```
 
 ---------------------------------------------
