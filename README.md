@@ -1,8 +1,11 @@
 <p align="center">
-<img src="https://i.imgur.com/sJmG7Nn.png" alt="logo"></a>
+<img src="https://i.imgur.com/oCFdRfj.png" alt="logo"></a>
 </p>
 
-# rez-tools
+<p align="center">
+<b>rez-tools</b>
+</p>
+
 A suite tool command line for [rez](https://github.com/nerdvegas/rez).
 
 **This tool requires you to install [rez](https://github.com/nerdvegas/rez/wiki/Installation) in advance.**
