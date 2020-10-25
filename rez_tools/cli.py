@@ -37,7 +37,6 @@ class ToolGroup(click.Group):
             inheriting_plugins = []
             for plugin_file_path in iglob(os.path.join(path,
                                                        '*' + reztoolsconfig.extension)):
-                print(plugin_file_path)
                 try:
                     plugin = Plugin(plugin_file_path)
                     if plugin.inherits_from:
