@@ -5,7 +5,7 @@ setup(
     name='rez-tools',
     package_dir={"": "."},
     packages=find_packages("."),
-    url='',
+    url='https://github.com/loonghao/rez-tools',
     license='MTL',
     author='Long Hao',
     author_email='hal.long@outlook.com',
@@ -16,5 +16,5 @@ setup(
     },
     description='',
     use_scm_version=True,
-    setup_requires=["setuptools_scm"],
+    setup_requires=['setuptools_scm'],
 )
