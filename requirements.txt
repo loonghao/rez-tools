@@ -1,2 +1,2 @@
 pyyaml>=5.0
-clik>=7.0
+click>=7.0
