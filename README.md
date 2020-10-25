@@ -49,13 +49,13 @@ python setup.py install
 
 QuickStart
 ----------
+`rez-tools` will find all tools via `reztoolsconfig:tool_paths`.
 ```cmd
 > set REZ_TOOL_CONFIG=C:\Users\hao.long\PycharmProjects\rez-tools\examples\reztoolsconfig.py
 > rt
 ```
-`rez-tools` will find all tools via `reztoolsconfig:tool_paths`
-`rt` will bind to the rt namespace according to the dynamic generation command 
-line defined in the found `.rt` file,
+`rt` will dynamically generate a command line and bind it to the rt namespace 
+based on the content defined in the found `.rt` file.
 
 type `rt` will list all tools found. like the below.
 
