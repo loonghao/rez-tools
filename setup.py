@@ -16,7 +16,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     install_requires=[
-        "clike>=7.0",
+        "click>=7.0",
         "pyyaml>=5.0",
     ],
     entry_points={
