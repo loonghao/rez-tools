@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-<b>rez-tools</b>
+<strong><b>rez-tools</b></strong>
 </p>
 
 A suite tool command line for [rez](https://github.com/nerdvegas/rez).
