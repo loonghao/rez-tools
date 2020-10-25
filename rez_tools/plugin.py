@@ -17,9 +17,7 @@ class Plugin(object):
 
     @property
     def rez_opts(self):
-        return [
-
-        ]
+        return []
 
     @property
     def run_detached(self):
@@ -83,7 +81,6 @@ class Plugin(object):
             'env': os.environ.copy(),
             'close_fds': True,
         }
-        print(self._assemble_command())
         if detached:
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW

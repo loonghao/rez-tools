@@ -7,7 +7,6 @@
 <img src="https://img.shields.io/pypi/pyversions/rez-tools" alt="python version"></a>
 <a href="https://badge.fury.io/py/rez-tools">
 <img src="https://img.shields.io/pypi/v/rez-tools?color=green" alt="PyPI version"></a>
-<img src="https://readthedocs.org/projects/rez-tools/badge/?version=master" alt="Documentation Status"></a>
 <img src="https://img.shields.io/pypi/dw/rez-tools" alt="Downloads Status"></a>
 <a href="https://pepy.tech/badge/rez-tools">
 <img src="https://pepy.tech/badge/rez-tools" alt="Downloads"></a>
@@ -55,8 +54,13 @@ QuickStart
 > rt
 ```
 `rez-tools` will find all tools via `reztoolsconfig:tool_paths`
+`rt` will bind to the rt namespace according to the dynamic generation command 
+line defined in the found `.rt` file,
+
+type `rt` will list all tools found. like the below.
+
 ```
-Usage: -c [OPTIONS] PLUGIN [PLUGIN OPTIONS]
+Usage: rt [OPTIONS] PLUGIN [PLUGIN OPTIONS]
 
 Options:
   -h, --help  Show this message and exit.
