@@ -3,7 +3,6 @@ from setuptools import setup
 
 setup(
     name='rez-tools',
-    version='0.1.62',
     package_dir={"": "."},
     packages=find_packages("."),
     url='',
@@ -16,6 +15,6 @@ setup(
         ]
     },
     description='',
-    # use_scm_version=True,
+    use_scm_version=True,
     setup_requires=["setuptools_scm"],
 )
