@@ -1,13 +1,17 @@
-# rez-tools
-A suite tool command line for rez.
+<p align="center">
+<img src="https://i.imgur.com/sJmG7Nn.png" alt="logo"></a>
+</p>
 
-# Installing
+# rez-tools
+A suite tool command line for [rez](https://github.com/nerdvegas/rez).
+
+**This tool requires you to install [rez](https://github.com/nerdvegas/rez/wiki/Installation) in advance.**
+
+
+# Installation Via Pip
 ```cmd
 pip install rez-tools
 ```
-
-# This tool requires you to install rez in advance
-
 
 ---------------------------------------------
 **maya.rt**
