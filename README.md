@@ -25,9 +25,9 @@
 
 
 
-<p align="center"> A suite tool command line for [rez](https://github.com/nerdvegas/rez). </p>
+A suite tool command line for [rez](https://github.com/nerdvegas/rez).
 
-<img src="https://i.imgur.com/lW6AA4p.jpg" alt="logo"></a>**This tool requires you to install [rez](https://github.com/nerdvegas/rez/wiki/Installation) in advance.**
+<img src="https://i.imgur.com/rECBBUD.jpeg" alt="logo"></a>**This tool requires you to install [rez](https://github.com/nerdvegas/rez/wiki/Installation) in advance.**
 
 
 # Installation Via Pip
