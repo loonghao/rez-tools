@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name='rez-tools',
+    name='rez_tools',
     package_dir={"": "."},
     packages=find_packages("."),
     url='https://github.com/loonghao/rez-tools',

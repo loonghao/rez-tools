@@ -3,22 +3,22 @@
 </p>
 
 <p align="center">
-<a href="https://img.shields.io/pypi/pyversions/rez-tools">
-<img src="https://img.shields.io/pypi/pyversions/rez-tools" alt="python version"></a>
-<a href="https://badge.fury.io/py/rez-tools">
-<img src="https://img.shields.io/pypi/v/rez-tools?color=green" alt="PyPI version"></a>
-<img src="https://img.shields.io/pypi/dw/rez-tools" alt="Downloads Status"></a>
+<a href="https://img.shields.io/pypi/pyversions/rez_tools">
+<img src="https://img.shields.io/pypi/pyversions/rez_tools" alt="python version"></a>
+<a href="https://badge.fury.io/py/rez_tools">
+<img src="https://img.shields.io/pypi/v/rez_tools?color=green" alt="PyPI version"></a>
+<img src="https://img.shields.io/pypi/dw/rez_tools" alt="Downloads Status"></a>
 <a href="https://pepy.tech/badge/rez_tools">
 <img src="https://pepy.tech/badge/rez_tools" alt="Downloads"></a>
-<img src="https://img.shields.io/pypi/l/rez-tools" alt="License"></a>
-<img src="https://img.shields.io/pypi/format/rez-tools" alt="pypi format"></a>
-<a href="https://github.com/loonghao/rez-tools/graphs/commit-activity">
+<img src="https://img.shields.io/pypi/l/rez_tools" alt="License"></a>
+<img src="https://img.shields.io/pypi/format/rez_tools" alt="pypi format"></a>
+<a href="https://github.com/loonghao/rez_tools/graphs/commit-activity">
 <img src="https://img.shields.io/badge/Maintained%3F-yes-green.svg" alt="Maintenance"></a>
 
 </p>
 
 <p align="center">
-<strong><b>rez-tools</b></strong>
+<strong><b>rez_tools</b></strong>
 </p>
 
 
@@ -32,7 +32,7 @@ Installing
 You can install via pip.
 
 ```cmd
-pip install rez-tools
+pip install rez_tools
 ```
 
 or through clone from Github.
@@ -41,7 +41,7 @@ git clone https://github.com/loonghao/rez-tools.git
 ```
 Install package.
 ```cmd
-cd rez-tools
+cd rez_tools
 ```
 ```cmd
 python setup.py install
@@ -49,9 +49,9 @@ python setup.py install
 
 QuickStart
 ----------
-`rez-tools` will find all tools via `reztoolsconfig:tool_paths`.
+`rez_tools` will find all tools via `reztoolsconfig:tool_paths`.
 ```cmd
-> set REZ_TOOL_CONFIG=C:\Users\hao.long\PycharmProjects\rez-tools\examples\reztoolsconfig.py
+> set REZ_TOOL_CONFIG=C:\Users\hao.long\PycharmProjects\rez_tools\examples\reztoolsconfig.py
 > rt
 ```
 `rt` will dynamically generate a command line and bind it to the rt namespace 
@@ -71,7 +71,7 @@ Plugin Commands:
   python         Python3.
 
 Tool Options:
-  rez-tools run other tools with their own options and argument patterns,
+  rez_tools run other tools with their own options and argument patterns,
   however, all tool has the following hidden options:
 
   --ignore-cmd  Ignore standard tool command when running the command,Remember
