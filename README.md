@@ -8,8 +8,8 @@
 <a href="https://badge.fury.io/py/rez-tools">
 <img src="https://img.shields.io/pypi/v/rez-tools?color=green" alt="PyPI version"></a>
 <img src="https://img.shields.io/pypi/dw/rez-tools" alt="Downloads Status"></a>
-<a href="https://pepy.tech/badge/rez-tools">
-<img src="https://pepy.tech/badge/rez-tools" alt="Downloads"></a>
+<a href="https://pepy.tech/badge/rez_tools">
+<img src="https://pepy.tech/badge/rez_tools" alt="Downloads"></a>
 <img src="https://img.shields.io/pypi/l/rez-tools" alt="License"></a>
 <img src="https://img.shields.io/pypi/format/rez-tools" alt="pypi format"></a>
 <a href="https://github.com/loonghao/rez-tools/graphs/commit-activity">
