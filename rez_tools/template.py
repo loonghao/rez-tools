@@ -31,7 +31,7 @@ def _{plugin.name}(ctx, ignore_cmd,
     rez_opts = {plugin.rez_opts} or {{}}
     if force_rez_env_time:
         rez_opts['time'] = force_rez_env_time
-    detached = {plugin.run_detached} or run_plugin_detached
+    detached = {plugin.run_detached} or run_detached
     if ignore_cmd:
         command = PLUGIN.assemble_command(args)
     else:
