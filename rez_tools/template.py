@@ -28,11 +28,17 @@ def _{plugin.name}(ctx, use_standard_cmd,
                    print_plugin_details,
                    force_rez_env_time):
     if print_plugin_details:
-        click.echon(json.dumps({plugin_dict}, indent=4))
+        click.echo(json.dumps({plugin_dict}, indent=4))
         ctx.exit()
     rez_opts = {plugin.rez_opts} or {{}}
     if force_rez_env_time:
         rez_opts['time'] = force_rez_env_time
     detached = {plugin.run_detached} or run_plugin_detached
+    full_args = []
+    full_args.extend(args)
+    if use_standard_cmd:
+        command = PLUGIN.assemble_command()
+    else:
+        command = full_args.pop(0)
     PLUGIN.run(detached)
 """

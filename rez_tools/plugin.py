@@ -1,6 +1,5 @@
 import os
 import subprocess
-
 from yaml import load, FullLoader
 
 from rez_tools import reztoolsconfig
@@ -34,22 +33,30 @@ class Plugin(object):
 
     @property
     def name(self):
-        basename = os.path.basename(self.path)
-        return basename.split(reztoolsconfig.extension)[0]
+        """str: name of tool, Default from file name."""
+        basename = self._data.get("name")
+        if not basename:
+            basename = os.path.basename(self.path)
+            basename = basename.split(reztoolsconfig.extension)[0]
+        return basename
 
     @property
     def command(self):
+        """str: Command line to be executed."""
         return self._data["command"]
 
     @property
     def inherits_from(self):
+        """The tools inherits from."""
         return self._data.get("inherits_from")
 
     @property
     def packages(self):
+        """All requires package from .rt file."""
         return self._data["requires"]
 
-    def _assemble_command(self):
+    def assemble_command(self):
+        """str: Assemble command line for rez-env."""
         rez_command = ['rez', 'env', '-q']
 
         # Add the packages.
@@ -63,12 +70,12 @@ class Plugin(object):
     def as_dict(self):
         return self._data
 
-    def run(self, detached=False):
-        """Launch a non-interactive command in a prepared contextual
-        environment.
+    @staticmethod
+    def run(command, detached=False):
+        """Launch a non-interactive command in a prepared contextual environment.
 
         Args:
-            cmd (str): The command being run (ie sys.argv[0]).
+            command (str):
             detached (bool): If True, run the command in a new, detached
                 terminal and exit pxo immediately. If False (default), run
                 cmd and wait for it to exit.
@@ -90,7 +97,7 @@ class Plugin(object):
                 'creationflags': subprocess.CREATE_NEW_CONSOLE,
                 'startupinfo': startupinfo,
             })
-            return subprocess.Popen('START /W ' + self._assemble_command(),
+            return subprocess.Popen('START /W ' + command,
                                     **kwargs).returncode
         else:
-            return subprocess.call(self._assemble_command(), **kwargs)
+            return subprocess.call(command, **kwargs)
