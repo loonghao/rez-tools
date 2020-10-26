@@ -203,14 +203,14 @@ class ToolGroup(click.Group):
                "however, all tool has the following hidden options: "
         opts = [
             (
-                '--ignore-standard-cmd',
-                '\bIgnore standard tool command when running the command,'
+                '--ignore-cmd',
+                'Ignore standard tool command when running the command,'
                 'Remember to provide an argument which will be used as the command '
                 'to run.'
-                'Examples: rt conan --ignore-standard-cmd python',
+                'Examples: rt conan --ignore-cmd python',
             ),
             (
-                '--print-plugin-details',
+                '--print',
                 "Print plugin details and exit."
             )
         ]

@@ -55,7 +55,7 @@ class Plugin(object):
         """All requires package from .rt file."""
         return self._data["requires"]
 
-    def assemble_command(self):
+    def assemble_command(self, command=None):
         """str: Assemble command line for rez-env."""
         rez_command = ['rez', 'env', '-q']
 
@@ -64,7 +64,10 @@ class Plugin(object):
 
         # add whatever command the user is passing in to the rez call
         rez_command.append('--')
-        rez_command.append(self.command)
+        if not command:
+            rez_command.append(self.command)
+        else:
+            rez_command.extend(command)
         return subprocess.list2cmdline(rez_command)
 
     def as_dict(self):
@@ -75,7 +78,7 @@ class Plugin(object):
         """Launch a non-interactive command in a prepared contextual environment.
 
         Args:
-            command (str):
+            command (str): The complete command line to be executed.
             detached (bool): If True, run the command in a new, detached
                 terminal and exit pxo immediately. If False (default), run
                 cmd and wait for it to exit.
@@ -97,7 +100,6 @@ class Plugin(object):
                 'creationflags': subprocess.CREATE_NEW_CONSOLE,
                 'startupinfo': startupinfo,
             })
-            return subprocess.Popen('START /W ' + command,
-                                    **kwargs).returncode
+            return subprocess.Popen('START /W ' + command, **kwargs).returncode
         else:
             return subprocess.call(command, **kwargs)

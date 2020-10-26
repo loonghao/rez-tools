@@ -66,7 +66,6 @@ Options:
   -h, --help  Show this message and exit.
 
 Plugin Commands:
-  cmake_gui      Camke GUi.
   conan_python2  A rez plugin - conan_python2.
   conan_python3  A rez plugin - conan_python3.
   python         Python3.
@@ -75,12 +74,11 @@ Tool Options:
   rez-tools run other tools with their own options and argument patterns,
   however, all tool has the following hidden options:
 
-  --ignore-standard-cmd  Ignore standard tool command when running the
-                          command,Remember to provide an argument which will
-                          be used as the command to run.
-                          Examples: rt conan --ignore-standard-cmd python
+  --ignore-cmd  Ignore standard tool command when running the command,Remember
+                to provide an argument which will be used as the command to
+                run.Examples: rt conan --ignore-cmd python
 
-  --print-plugin-details  Print plugin details and exit.
+  --print       Print plugin details and exit.
 
 ```
 ---------------------------------------------
