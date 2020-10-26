@@ -66,13 +66,38 @@ Options:
   -h, --help  Show this message and exit.
 
 Plugin Commands:
-  cmke_gui       Camke GUi.
   conan_python2  A rez plugin - conan_python2.
   conan_python3  A rez plugin - conan_python3.
   python         Python3.
-```
 
+Tool Options:
+  rez-tools run other tools with their own options and argument patterns,
+  however, all tool has the following hidden options:
+
+  --ignore-cmd  Ignore standard tool command when running the command,Remember
+                to provide an argument which will be used as the command to
+                run.Examples: rt conan --ignore-cmd python
+
+  --print       Print plugin details and exit.
+
+```
 ---------------------------------------------
+
+Define the suite description of `rez-tool`
+------------------------------------------
+The file format is .rt, the syntax is `yaml`
+
+The following fields are now supported:
+
+
+| Key         |required    | description                                |
+|-------------|------------|------------------------------------------- |
+| name        |    no      | The name of the tool, which will finally be registered in the command line.|
+| command     |    yes     | The complete command line to be executed.  |
+| requires    |    yes     | The name of the rez package that the command line execution environment depends on|
+
+Examples:
+
 **maya.rt**
 ```yaml
 command: maya
@@ -97,4 +122,21 @@ requeres:
 run command line
 ```cmd
 rt cmake_gui
+```
+
+-----------------------------------------------
+
+**python-2.rt**
+
+```yaml
+name: python_2
+command: python
+requeres:
+    - python-2.7
+    - pyside
+    - pyyaml
+```
+run command line
+```cmd
+rt python_2
 ```

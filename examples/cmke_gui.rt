@@ -1,4 +1,0 @@
-command: cmake-gui
-short_help: Camke GUi.
-requires:
-  - cmake

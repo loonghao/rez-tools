@@ -4,6 +4,7 @@ import os
 import sys
 from collections import OrderedDict
 from glob import iglob
+import re
 
 import click
 from yaml import YAMLError
@@ -15,7 +16,7 @@ from rez_tools.template import TOOL_TEMPLATE
 
 class ToolGroup(click.Group):
     plugins = None
-    plugin_template = TOOL_TEMPLATE
+    plugin_template: str = TOOL_TEMPLATE
     plugin_command_metavar = 'PLUGIN [PLUGIN OPTIONS]'
 
     def __init__(self, name=None, commands=None, **attrs):
@@ -35,28 +36,28 @@ class ToolGroup(click.Group):
         plugins = []
         for path in reversed(reztoolsconfig.tool_paths):
             inheriting_plugins = []
-            for plugin_file_path in iglob(os.path.join(path,
-                                                       '*' + reztoolsconfig.extension)):
+            for plugin_file_path in iglob(os.path.join(path, '*' + reztoolsconfig.extension)):
                 try:
                     plugin = Plugin(plugin_file_path)
+                    pattern = '^[a-zA-Z][a-zA-Z0-9_]+$'
+                    verify_name = re.match(pattern, plugin.name)
+                    if not verify_name:
+                        logger.warning("The name of the plug-in does not match, please modify it to a name that "
+                                       "conforms to the rules: %s\n %s", pattern, plugin_file_path)
+                        continue
                     if plugin.inherits_from:
-                        logger.debug(
-                            'Deferring load of sub-plugin {0}'.format(
-                                plugin.name))
+                        logger.debug('Deferring load of sub-plugin {0}'.format(plugin.name))
                         inheriting_plugins.append(plugin)
                         continue
 
                 except OSError as err:
-                    logger.warning('Unable to read plugin {0}: {1}'.format(
-                        plugin_file_path, err))
+                    logger.warning('Unable to read plugin {0}: {1}'.format(plugin_file_path, err))
                     continue
                 except YAMLError as err:
-                    logger.warning('Unable to parse plugin {0}: {1}'.format(
-                        plugin_file_path, err))
+                    logger.warning('Unable to parse plugin {0}: {1}'.format(plugin_file_path, err))
                     continue
                 except ValueError as err:
-                    logger.warning('Unable to validate plugin {0}: {1}'.format(
-                        plugin_file_path, err))
+                    logger.warning('Unable to validate plugin {0}: {1}'.format(plugin_file_path, err))
                     continue
                 plugins.append(plugin)
 
@@ -65,8 +66,7 @@ class ToolGroup(click.Group):
     def populate_plugins(self, ctx):
         """Populate the class variable that holds all the dynamically-loaded
 
-        plugins. Run lazily the first time list_plugins or get_command are
-        called.
+        plugins. Run lazily the first time list_plugins or get_command are called.
 
         Args:
             ctx (click.Context): The current context.
@@ -85,23 +85,24 @@ class ToolGroup(click.Group):
         return self.plugins
 
     def get_namespace(self, class_name):
-        """Get the namespace for plugin compile. Subclasses will need to add to
-        this.
+        """Get the namespace for plugin compile. Subclasses will need to add to this.
 
         Args:
             class_name (str): The name of the class being compiled.
 
         Returns:
             dict: The namespace for compiling the plugin.
+
         """
-        namespace = dict(
-            __name__='{0.__class__.__name__}_get_command_{1}'.format(
-                self, class_name),
-            click=click, OrderedDict=OrderedDict, json=json, ToolGroup=self)
-        namespace[self.name] = self
-        namespace['ToolGroup'] = ToolGroup
-        namespace["PLUGIN"] = self.plugins[class_name[1:]]
-        return namespace
+        return {
+            "__name__": '{0.__class__.__name__}_get_command_{1}'.format(self, class_name),
+            "click": click,
+            "OrderedDict": OrderedDict,
+            "json": json,
+            "ToolGroup": ToolGroup,
+            self.name: self,
+            "PLUGIN": self.plugins[class_name[1:]]
+        }
 
     def get_command(self, ctx, cmd_name):
         """As per click.Group.get_command, but populates the plugin list.
@@ -119,14 +120,10 @@ class ToolGroup(click.Group):
         if cmd is None:
             cmd = self.populate_plugins(ctx).get(cmd_name)
             if cmd is not None:
-                class_name = '_' + str(cmd_name)
+                class_name = '_{}'.format(cmd_name)
                 class_definition = self.plugin_template.format(group=self,
                                                                plugin=cmd,
                                                                plugin_dict=cmd.as_dict())
-
-                # execute the template string in a temporary namespace and
-                # support tracing utilities by setting a value for
-                # frame.f_globals['__name__']
                 namespace = self.get_namespace(class_name)
                 try:
                     # pylint: disable=exec-used
@@ -134,18 +131,7 @@ class ToolGroup(click.Group):
                 except SyntaxError as error:
                     raise SyntaxError('{}:\n{}'.format(error,
                                                        class_definition))
-                plugin = namespace[class_name]
-                # for pickling to work, the __module__ variable needs to be
-                # set to the frame where the plugin is created.
-                # Bypass this step in environments where sys._getframe is not
-                # defined (Jython for example) or sys._getframe is not
-                # defined for arguments greater than 0 (IronPython).
-                try:
-                    plugin.__module__ = sys._getframe(1).f_globals.get(
-                        '__name__', '__main__')
-                except (AttributeError, ValueError):
-                    pass
-                cmd = plugin
+                cmd = namespace[class_name]
         return cmd
 
     @staticmethod
@@ -211,8 +197,47 @@ class ToolGroup(click.Group):
         Args:
             ctx (click.Context): The current context.
             formatter (click.Formatter): The current formatter.
+
         """
-        pass
+        head = "rez-tools run other tools with their own options and argument patterns, " \
+               "however, all tool has the following hidden options: "
+        opts = [
+            (
+                '--ignore-cmd',
+                'Ignore standard tool command when running the command,'
+                'Remember to provide an argument which will be used as the command '
+                'to run.'
+                'Examples: rt conan --ignore-cmd python',
+            ),
+            (
+                '--print',
+                "Print plugin details and exit."
+            )
+        ]
+        with formatter.section("Tool Options"):
+            formatter.write_text(head)
+            formatter.write_paragraph()
+            formatter.write_dl(opts)
+
+    def parse_args(self, ctx, args):
+        if not args and self.no_args_is_help:
+            if not ctx.resilient_parsing:
+                click.echo(ctx.get_help(), color=ctx.color)
+                ctx.exit()
+
+        parser = self.make_parser(ctx)
+        passed_opts, passed_args, passed_order = parser.parse_args(args=args[:])
+
+        passed_options = OrderedDict()
+        for opt in passed_order:
+            if opt.name not in passed_options:
+                passed_options[opt.name] = opt
+
+        all_options = OrderedDict()
+        for opt in self.get_params(ctx):
+            if opt.name not in all_options:
+                all_options[opt.name] = opt
+        return super(ToolGroup, self).parse_args(ctx, passed_args)
 
     def format_options(self, ctx, formatter):
         """Format the options and add the plugin details (if any) to the
@@ -221,6 +246,7 @@ class ToolGroup(click.Group):
         Args:
             ctx (click.Context): The current context.
             formatter (click.Formatter): The current formatter.
+
         """
         super(ToolGroup, self).format_options(ctx, formatter)
         if self.format_plugins(ctx, formatter):
@@ -231,7 +257,6 @@ class ToolGroup(click.Group):
     name='rez_tools',
     cls=ToolGroup,
     invoke_without_command=False,
-    context_settings={
-        'help_option_names': ['-h', '--help']})
+    context_settings={'help_option_names': ['-h', '--help']})
 def cli():
     pass

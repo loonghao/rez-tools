@@ -1,0 +1,4 @@
+command: cmake-gui
+short_help: Cmake GUi.
+requires:
+  - cmake
