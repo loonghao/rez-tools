@@ -26,7 +26,7 @@ def _{plugin.name}(ctx, ignore_cmd,
                    print_plugin_details,
                    force_rez_env_time):
     if print_plugin_details:
-        click.echo(json.dumps({plugin_dict}, indent=4))
+        click.echo(json.dumps({plugin_dict}, indent=4, ensure_ascii=False))
         ctx.exit()
     rez_opts = {plugin.rez_opts} or {{}}
     if force_rez_env_time:
