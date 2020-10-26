@@ -39,10 +39,11 @@ class ToolGroup(click.Group):
             for plugin_file_path in iglob(os.path.join(path, '*' + reztoolsconfig.extension)):
                 try:
                     plugin = Plugin(plugin_file_path)
-                    verify_name = re.match('^[a-zA-Z][a-zA-Z0-9_]+', plugin.name)
+                    pattern = '^[a-zA-Z][a-zA-Z0-9_]+$'
+                    verify_name = re.match(pattern, plugin.name)
                     if not verify_name:
                         logger.warning("The name of the plug-in does not match, please modify it to a name that "
-                                       "conforms to the rules: ^[a-zA-Z][a-zA-Z0-9_]+\n %s", plugin_file_path)
+                                       "conforms to the rules: %s\n %s", pattern, plugin_file_path)
                         continue
                     if plugin.inherits_from:
                         logger.debug('Deferring load of sub-plugin {0}'.format(plugin.name))
@@ -198,15 +199,14 @@ class ToolGroup(click.Group):
             formatter (click.Formatter): The current formatter.
 
         """
-        head = "rez-tools run other tools with their own options and " \
-               "argument patterns, however all" \
-               "tool have the following hidden options: "
+        head = "rez-tools run other tools with their own options and argument patterns, " \
+               "however, all tool has the following hidden options: "
         opts = [
             (
                 '--ignore-standard-cmd',
-                'Ignore standard tool command when running the command,'
+                '\bIgnore standard tool command when running the command,'
                 'Remember to provide an argument which will be used as the command '
-                'to run. This will also disable the standard args, basically providing --ignore-standard-args as well.'
+                'to run.'
                 'Examples: rt conan --ignore-standard-cmd python',
             ),
             (
