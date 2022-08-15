@@ -1,2 +1,2 @@
-pyyaml>=5.0
-click>=7.0
+pyyaml==6.0
+click==8.1.3
