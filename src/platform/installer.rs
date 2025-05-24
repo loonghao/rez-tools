@@ -1,6 +1,6 @@
 use crate::error::{Result, RezToolsError};
-use crate::platform::{Platform, python_standalone::PythonStandalone};
-use log::{info, warn, debug};
+use crate::platform::{python_standalone::PythonStandalone, Platform};
+use log::{debug, info, warn};
 use std::path::PathBuf;
 use tokio::fs;
 use tokio::process::Command as AsyncCommand;
@@ -26,7 +26,7 @@ pub async fn install_rez() -> Result<()> {
     }
 
     Err(RezToolsError::ConfigError(
-        "Failed to install rez using any available method".to_string()
+        "Failed to install rez using any available method".to_string(),
     ))
 }
 
@@ -35,10 +35,7 @@ async fn try_install_with_uv() -> Result<()> {
     debug!("Attempting to install rez with uv");
 
     // Check if uv is available
-    let uv_check = AsyncCommand::new("uv")
-        .arg("--version")
-        .output()
-        .await;
+    let uv_check = AsyncCommand::new("uv").arg("--version").output().await;
 
     if let Err(e) = uv_check {
         debug!("uv not found: {}", e);
@@ -55,9 +52,10 @@ async fn try_install_with_uv() -> Result<()> {
         .map_err(|e| RezToolsError::ConfigError(format!("Failed to create venv: {}", e)))?;
 
     if !output.status.success() {
-        return Err(RezToolsError::ConfigError(
-            format!("uv venv failed: {}", String::from_utf8_lossy(&output.stderr))
-        ));
+        return Err(RezToolsError::ConfigError(format!(
+            "uv venv failed: {}",
+            String::from_utf8_lossy(&output.stderr)
+        )));
     }
 
     // Install rez in the virtual environment
@@ -69,9 +67,10 @@ async fn try_install_with_uv() -> Result<()> {
         .map_err(|e| RezToolsError::ConfigError(format!("Failed to install rez: {}", e)))?;
 
     if !output.status.success() {
-        return Err(RezToolsError::ConfigError(
-            format!("pip install rez failed: {}", String::from_utf8_lossy(&output.stderr))
-        ));
+        return Err(RezToolsError::ConfigError(format!(
+            "pip install rez failed: {}",
+            String::from_utf8_lossy(&output.stderr)
+        )));
     }
 
     // Find the Python executable in the venv
@@ -96,7 +95,8 @@ async fn try_install_with_pip() -> Result<()> {
     debug!("Attempting to install rez with pip");
 
     // Check if we're in a virtual environment
-    let in_venv = std::env::var("VIRTUAL_ENV").is_ok() || std::env::var("CONDA_DEFAULT_ENV").is_ok();
+    let in_venv =
+        std::env::var("VIRTUAL_ENV").is_ok() || std::env::var("CONDA_DEFAULT_ENV").is_ok();
 
     let mut args = vec!["install"];
     if !in_venv {
@@ -118,9 +118,10 @@ async fn try_install_with_pip() -> Result<()> {
     } else {
         let stderr = String::from_utf8_lossy(&output.stderr);
         debug!("pip install failed: {}", stderr);
-        Err(RezToolsError::ConfigError(
-            format!("pip install failed: {}", stderr)
-        ))
+        Err(RezToolsError::ConfigError(format!(
+            "pip install failed: {}",
+            stderr
+        )))
     }
 }
 
@@ -156,9 +157,10 @@ async fn install_rez_with_python_exe(python_exe: &PathBuf) -> Result<()> {
         .map_err(|e| RezToolsError::ConfigError(format!("Failed to run pip: {}", e)))?;
 
     if !output.status.success() {
-        return Err(RezToolsError::ConfigError(
-            format!("Failed to install rez: {}", String::from_utf8_lossy(&output.stderr))
-        ));
+        return Err(RezToolsError::ConfigError(format!(
+            "Failed to install rez: {}",
+            String::from_utf8_lossy(&output.stderr)
+        )));
     }
 
     // Create production install marker to avoid pip installation warnings
@@ -180,14 +182,15 @@ async fn create_rez_wrapper(python_exe: &PathBuf) -> Result<()> {
     // Create bin directory
     fs::create_dir_all(&bin_dir).await?;
 
-    let wrapper_name = if platform.os == "windows" { "rez.bat" } else { "rez" };
+    let wrapper_name = if platform.os == "windows" {
+        "rez.bat"
+    } else {
+        "rez"
+    };
     let wrapper_path = bin_dir.join(wrapper_name);
 
     let wrapper_content = if platform.os == "windows" {
-        format!(
-            "@echo off\n\"{}\" -m rez %*\n",
-            python_exe.display()
-        )
+        format!("@echo off\n\"{}\" -m rez %*\n", python_exe.display())
     } else {
         format!(
             "#!/bin/bash\nexec \"{}\" -m rez \"$@\"\n",
@@ -213,9 +216,15 @@ async fn create_rez_wrapper(python_exe: &PathBuf) -> Result<()> {
 
     // Provide instructions to user
     if platform.os == "windows" {
-        info!("Add {} to your PATH to use 'rez' command directly", bin_dir.display());
+        info!(
+            "Add {} to your PATH to use 'rez' command directly",
+            bin_dir.display()
+        );
     } else {
-        info!("Add {} to your PATH to use 'rez' command directly", bin_dir.display());
+        info!(
+            "Add {} to your PATH to use 'rez' command directly",
+            bin_dir.display()
+        );
         info!("Or run: export PATH=\"{}:$PATH\"", bin_dir.display());
     }
 
@@ -227,7 +236,8 @@ async fn create_rez_production_marker(python_exe: &PathBuf) -> Result<()> {
     let platform = Platform::detect();
 
     // Find the Scripts/bin directory where rez is installed
-    let python_dir = python_exe.parent()
+    let python_dir = python_exe
+        .parent()
         .ok_or_else(|| RezToolsError::ConfigError("Invalid Python executable path".to_string()))?;
 
     let scripts_dir = if platform.os == "windows" {
@@ -241,15 +251,14 @@ async fn create_rez_production_marker(python_exe: &PathBuf) -> Result<()> {
     // Create the marker file (empty file)
     fs::write(&marker_file, "").await?;
 
-    info!("Created rez production install marker: {}", marker_file.display());
+    info!(
+        "Created rez production install marker: {}",
+        marker_file.display()
+    );
     debug!("This marker file prevents rez from showing pip installation warnings");
 
     Ok(())
 }
-
-
-
-
 
 /// Get rez-tools directory
 fn get_rez_tools_dir() -> PathBuf {
@@ -272,7 +281,9 @@ fn get_venv_pip_path(venv_path: &PathBuf) -> Result<PathBuf> {
     if pip_path.exists() {
         Ok(pip_path)
     } else {
-        Err(RezToolsError::ConfigError("pip not found in venv".to_string()))
+        Err(RezToolsError::ConfigError(
+            "pip not found in venv".to_string(),
+        ))
     }
 }
 
@@ -386,7 +397,10 @@ mod tests {
         // Don't create pip executable
         let result = get_venv_pip_path(&venv_path);
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("pip not found in venv"));
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("pip not found in venv"));
     }
 
     #[test]
@@ -397,19 +411,22 @@ mod tests {
 
         // Test with VIRTUAL_ENV set
         std::env::set_var("VIRTUAL_ENV", "/path/to/venv");
-        let in_venv = std::env::var("VIRTUAL_ENV").is_ok() || std::env::var("CONDA_DEFAULT_ENV").is_ok();
+        let in_venv =
+            std::env::var("VIRTUAL_ENV").is_ok() || std::env::var("CONDA_DEFAULT_ENV").is_ok();
         assert!(in_venv);
 
         // Test with CONDA_DEFAULT_ENV set
         std::env::remove_var("VIRTUAL_ENV");
         std::env::set_var("CONDA_DEFAULT_ENV", "myenv");
-        let in_conda = std::env::var("VIRTUAL_ENV").is_ok() || std::env::var("CONDA_DEFAULT_ENV").is_ok();
+        let in_conda =
+            std::env::var("VIRTUAL_ENV").is_ok() || std::env::var("CONDA_DEFAULT_ENV").is_ok();
         assert!(in_conda);
 
         // Test with neither set
         std::env::remove_var("VIRTUAL_ENV");
         std::env::remove_var("CONDA_DEFAULT_ENV");
-        let not_in_venv = std::env::var("VIRTUAL_ENV").is_ok() || std::env::var("CONDA_DEFAULT_ENV").is_ok();
+        let not_in_venv =
+            std::env::var("VIRTUAL_ENV").is_ok() || std::env::var("CONDA_DEFAULT_ENV").is_ok();
         assert!(!not_in_venv);
 
         // Restore original environment
@@ -447,7 +464,3 @@ mod tests {
         assert_eq!(args, vec!["install", "--user", "rez"]);
     }
 }
-
-
-
-

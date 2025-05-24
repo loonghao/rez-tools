@@ -8,20 +8,22 @@ pub fn parse_plugin_file<P: AsRef<Path>>(file_path: P) -> Result<Plugin> {
     let file_path = file_path.as_ref();
 
     // Read the file content
-    let content = fs::read_to_string(file_path)
-        .map_err(|e| RezToolsError::PluginParseError(format!(
+    let content = fs::read_to_string(file_path).map_err(|e| {
+        RezToolsError::PluginParseError(format!(
             "Failed to read plugin file '{}': {}",
             file_path.display(),
             e
-        )))?;
+        ))
+    })?;
 
     // Parse YAML content
-    let mut plugin: Plugin = serde_yaml::from_str(&content)
-        .map_err(|e| RezToolsError::PluginParseError(format!(
+    let mut plugin: Plugin = serde_yaml::from_str(&content).map_err(|e| {
+        RezToolsError::PluginParseError(format!(
             "Failed to parse YAML in '{}': {}",
             file_path.display(),
             e
-        )))?;
+        ))
+    })?;
 
     // Set the file path
     plugin.file_path = file_path.to_path_buf();
@@ -52,7 +54,8 @@ requires:
   - python-3
   - cmake
 "#
-        ).unwrap();
+        )
+        .unwrap();
 
         let plugin = parse_plugin_file(&plugin_file).unwrap();
         assert_eq!(plugin.command, "python");
@@ -75,7 +78,8 @@ command: python
 requires:
   - python-3
 "#
-        ).unwrap();
+        )
+        .unwrap();
 
         let plugin = parse_plugin_file(&plugin_file).unwrap();
         assert_eq!(plugin.get_name(), "custom_python");
@@ -88,7 +92,10 @@ requires:
 
         let result = parse_plugin_file(temp_file.path());
         assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), RezToolsError::PluginParseError(_)));
+        assert!(matches!(
+            result.unwrap_err(),
+            RezToolsError::PluginParseError(_)
+        ));
     }
 
     #[test]
@@ -99,7 +106,8 @@ requires:
             r#"
 short_help: Missing command and requires
 "#
-        ).unwrap();
+        )
+        .unwrap();
 
         let result = parse_plugin_file(temp_file.path());
         assert!(result.is_err());

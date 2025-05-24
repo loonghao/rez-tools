@@ -35,11 +35,7 @@ impl DownloadClient {
     }
 
     /// Download a file with retry logic
-    pub async fn download_file<P: AsRef<Path>>(
-        &self,
-        url: &str,
-        destination: P,
-    ) -> Result<()> {
+    pub async fn download_file<P: AsRef<Path>>(&self, url: &str, destination: P) -> Result<()> {
         let destination = destination.as_ref();
 
         // Create parent directory if it doesn't exist
@@ -48,7 +44,10 @@ impl DownloadClient {
         }
 
         for attempt in 1..=self.max_retries {
-            info!("Downloading {} (attempt {} of {})", url, attempt, self.max_retries);
+            info!(
+                "Downloading {} (attempt {} of {})",
+                url, attempt, self.max_retries
+            );
 
             match self.try_download(url, destination).await {
                 Ok(()) => {
@@ -77,15 +76,12 @@ impl DownloadClient {
     }
 
     /// Single download attempt
-    async fn try_download<P: AsRef<Path>>(
-        &self,
-        url: &str,
-        destination: P,
-    ) -> Result<()> {
+    async fn try_download<P: AsRef<Path>>(&self, url: &str, destination: P) -> Result<()> {
         let destination = destination.as_ref();
 
         // Start the download
-        let response = self.client
+        let response = self
+            .client
             .get(url)
             .timeout(self.timeout)
             .send()
@@ -96,7 +92,10 @@ impl DownloadClient {
             return Err(RezToolsError::ConfigError(format!(
                 "HTTP error {}: {}",
                 response.status(),
-                response.status().canonical_reason().unwrap_or("Unknown error")
+                response
+                    .status()
+                    .canonical_reason()
+                    .unwrap_or("Unknown error")
             )));
         }
 
@@ -108,7 +107,8 @@ impl DownloadClient {
 
         // Create temporary file
         let temp_path = destination.with_extension("tmp");
-        let mut file = fs::File::create(&temp_path).await
+        let mut file = fs::File::create(&temp_path)
+            .await
             .map_err(|e| RezToolsError::ConfigError(format!("Failed to create file: {}", e)))?;
 
         // Download with streaming
@@ -117,10 +117,11 @@ impl DownloadClient {
 
         use futures_util::StreamExt;
         while let Some(chunk) = stream.next().await {
-            let chunk = chunk
-                .map_err(|e| RezToolsError::ConfigError(format!("Stream error: {}", e)))?;
+            let chunk =
+                chunk.map_err(|e| RezToolsError::ConfigError(format!("Stream error: {}", e)))?;
 
-            file.write_all(&chunk).await
+            file.write_all(&chunk)
+                .await
                 .map_err(|e| RezToolsError::ConfigError(format!("Write error: {}", e)))?;
 
             downloaded += chunk.len() as u64;
@@ -129,29 +130,41 @@ impl DownloadClient {
             if let Some(total) = total_size {
                 let progress = (downloaded as f64 / total as f64) * 100.0;
                 if downloaded % (1024 * 1024) == 0 || downloaded == total {
-                    debug!("Downloaded {:.1}% ({} / {} bytes)", progress, downloaded, total);
+                    debug!(
+                        "Downloaded {:.1}% ({} / {} bytes)",
+                        progress, downloaded, total
+                    );
                 }
             }
         }
 
         // Ensure all data is written
-        file.flush().await
+        file.flush()
+            .await
             .map_err(|e| RezToolsError::ConfigError(format!("Flush error: {}", e)))?;
 
         drop(file);
 
         // Move temp file to final destination
-        fs::rename(&temp_path, destination).await
+        fs::rename(&temp_path, destination)
+            .await
             .map_err(|e| RezToolsError::ConfigError(format!("Failed to move file: {}", e)))?;
 
-        info!("Downloaded {} bytes to {}", downloaded, destination.display());
+        info!(
+            "Downloaded {} bytes to {}",
+            downloaded,
+            destination.display()
+        );
         Ok(())
     }
 
     /// Download and return content as bytes
     pub async fn download_bytes(&self, url: &str) -> Result<Vec<u8>> {
         for attempt in 1..=self.max_retries {
-            debug!("Downloading {} to memory (attempt {} of {})", url, attempt, self.max_retries);
+            debug!(
+                "Downloading {} to memory (attempt {} of {})",
+                url, attempt, self.max_retries
+            );
 
             match self.try_download_bytes(url).await {
                 Ok(bytes) => {
@@ -176,7 +189,8 @@ impl DownloadClient {
 
     /// Single attempt to download bytes
     async fn try_download_bytes(&self, url: &str) -> Result<Vec<u8>> {
-        let response = self.client
+        let response = self
+            .client
             .get(url)
             .timeout(self.timeout)
             .send()
@@ -187,11 +201,16 @@ impl DownloadClient {
             return Err(RezToolsError::ConfigError(format!(
                 "HTTP error {}: {}",
                 response.status(),
-                response.status().canonical_reason().unwrap_or("Unknown error")
+                response
+                    .status()
+                    .canonical_reason()
+                    .unwrap_or("Unknown error")
             )));
         }
 
-        let bytes = response.bytes().await
+        let bytes = response
+            .bytes()
+            .await
             .map_err(|e| RezToolsError::ConfigError(format!("Failed to read response: {}", e)))?;
 
         Ok(bytes.to_vec())
@@ -226,18 +245,28 @@ mod tests {
 
         // This test would require a real HTTP server or mock
         // For now, we'll test the error case with an invalid URL
-        let result = client.download_file("http://invalid-url-that-does-not-exist.com/file.txt", &destination).await;
+        let result = client
+            .download_file(
+                "http://invalid-url-that-does-not-exist.com/file.txt",
+                &destination,
+            )
+            .await;
 
         // Should fail with network error
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("Failed to download"));
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("Failed to download"));
     }
 
     #[tokio::test]
     async fn test_download_bytes_invalid_url() {
         let client = DownloadClient::new();
 
-        let result = client.download_bytes("http://invalid-url-that-does-not-exist.com/data").await;
+        let result = client
+            .download_bytes("http://invalid-url-that-does-not-exist.com/data")
+            .await;
 
         // Should fail with network error
         assert!(result.is_err());

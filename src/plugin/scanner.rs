@@ -16,7 +16,7 @@ pub fn scan_plugins<P: AsRef<Path>>(
     // Process paths in reverse order (like the Python version)
     for path in tool_paths.iter().rev() {
         let path = path.as_ref();
-        
+
         if !path.exists() {
             debug!("Tool path does not exist: {}", path.display());
             continue;
@@ -48,7 +48,11 @@ pub fn scan_plugins<P: AsRef<Path>>(
             let plugin = match parse_plugin_file(&plugin_file_path) {
                 Ok(plugin) => plugin,
                 Err(e) => {
-                    warn!("Failed to parse plugin '{}': {}", plugin_file_path.display(), e);
+                    warn!(
+                        "Failed to parse plugin '{}': {}",
+                        plugin_file_path.display(),
+                        e
+                    );
                     continue;
                 }
             };
@@ -67,7 +71,10 @@ pub fn scan_plugins<P: AsRef<Path>>(
 
     // TODO: Handle inheriting plugins (for future implementation)
     if !inheriting_plugins.is_empty() {
-        warn!("Plugin inheritance is not yet implemented. {} plugins deferred.", inheriting_plugins.len());
+        warn!(
+            "Plugin inheritance is not yet implemented. {} plugins deferred.",
+            inheriting_plugins.len()
+        );
     }
 
     Ok(plugins)
@@ -96,14 +103,15 @@ short_help: Test tool
 requires:
   - test-package
 "#
-        ).unwrap();
+        )
+        .unwrap();
 
         // Scan for plugins
         let plugins = scan_plugins(&[temp_path], ".rt").unwrap();
 
         assert_eq!(plugins.len(), 1);
         assert!(plugins.contains_key("test_tool"));
-        
+
         let plugin = &plugins["test_tool"];
         assert_eq!(plugin.command, "test-command");
         assert_eq!(plugin.get_short_help(), "Test tool");

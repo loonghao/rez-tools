@@ -2,7 +2,6 @@ use rez_tools::config::loader::load_config;
 use std::env;
 use std::fs;
 
-
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -42,7 +41,8 @@ tool_paths = [
 "#,
         input_path,
         config.extension,
-        config.tool_paths
+        config
+            .tool_paths
             .iter()
             .map(|p| format!("    \"{}\"", p.display().to_string().replace('\\', "\\\\")))
             .collect::<Vec<_>>()

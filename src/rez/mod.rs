@@ -1,7 +1,7 @@
 pub mod executor;
 
-use crate::plugin::Plugin;
 use crate::platform::rez_path;
+use crate::plugin::Plugin;
 use std::process::Command;
 
 /// Represents a rez command to be executed
@@ -79,8 +79,6 @@ impl RezCommand {
 
         command
     }
-
-
 
     /// Convert to a Command object for execution
     pub fn to_command(&self) -> Command {

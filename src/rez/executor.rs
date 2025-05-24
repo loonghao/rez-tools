@@ -35,7 +35,11 @@ async fn execute_attached(command_parts: &[String]) -> Result<i32> {
     cmd.stdout(Stdio::inherit());
     cmd.stderr(Stdio::inherit());
 
-    debug!("Starting attached process: {} {:?}", command_parts[0], &command_parts[1..]);
+    debug!(
+        "Starting attached process: {} {:?}",
+        command_parts[0],
+        &command_parts[1..]
+    );
 
     let output = cmd.status().await.map_err(|e| {
         RezToolsError::RezExecutionError(format!(
@@ -66,7 +70,11 @@ async fn execute_detached(command_parts: &[String]) -> Result<i32> {
     cmd.stdout(Stdio::null());
     cmd.stderr(Stdio::null());
 
-    debug!("Starting detached process: {} {:?}", command_parts[0], &command_parts[1..]);
+    debug!(
+        "Starting detached process: {} {:?}",
+        command_parts[0],
+        &command_parts[1..]
+    );
 
     let _child = cmd.spawn().map_err(|e| {
         RezToolsError::RezExecutionError(format!(
@@ -160,8 +168,8 @@ mod tests {
     #[test]
     fn test_build_command_with_args() {
         let plugin = create_test_plugin();
-        let rez_cmd = RezCommand::new(plugin)
-            .with_args(vec!["hello".to_string(), "world".to_string()]);
+        let rez_cmd =
+            RezCommand::new(plugin).with_args(vec!["hello".to_string(), "world".to_string()]);
 
         let command = rez_cmd.build_command();
         assert_eq!(command[6], "hello");
@@ -173,7 +181,11 @@ mod tests {
         let plugin = create_test_plugin();
         let rez_cmd = RezCommand::new(plugin)
             .with_ignore_cmd(true)
-            .with_args(vec!["python".to_string(), "-c".to_string(), "print('hello')".to_string()]);
+            .with_args(vec![
+                "python".to_string(),
+                "-c".to_string(),
+                "print('hello')".to_string(),
+            ]);
 
         let command = rez_cmd.build_command();
         assert_eq!(command[5], "python");

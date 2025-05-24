@@ -1,7 +1,7 @@
 pub mod detection;
-pub mod installer;
 pub mod download;
 pub mod extract;
+pub mod installer;
 pub mod python_standalone;
 pub mod rez_path;
 
@@ -51,10 +51,10 @@ impl Platform {
     pub fn is_supported(&self) -> bool {
         matches!(
             (self.os.as_str(), self.arch.as_str()),
-            ("windows", "x86_64") |
-            ("linux", "x86_64") |
-            ("macos", "x86_64") |
-            ("macos", "aarch64")
+            ("windows", "x86_64")
+                | ("linux", "x86_64")
+                | ("macos", "x86_64")
+                | ("macos", "aarch64")
         )
     }
 }
@@ -88,17 +88,16 @@ impl RezEnvironment {
     pub fn rez_command(&self) -> Result<PathBuf> {
         if let Some(ref rez_path) = self.rez_path {
             let platform = Platform::detect();
-            let rez_exe = rez_path.join("bin").join(format!("rez{}", platform.exe_extension()));
+            let rez_exe = rez_path
+                .join("bin")
+                .join(format!("rez{}", platform.exe_extension()));
             if rez_exe.exists() {
                 return Ok(rez_exe);
             }
         }
 
         // Try to find rez in PATH
-        if let Ok(output) = std::process::Command::new("which")
-            .arg("rez")
-            .output()
-        {
+        if let Ok(output) = std::process::Command::new("which").arg("rez").output() {
             if output.status.success() {
                 let output_str = String::from_utf8_lossy(&output.stdout);
                 let path_str = output_str.trim();
@@ -107,7 +106,7 @@ impl RezEnvironment {
         }
 
         Err(RezToolsError::ConfigError(
-            "Rez command not found. Please install rez or run 'rt install-rez'".to_string()
+            "Rez command not found. Please install rez or run 'rt install-rez'".to_string(),
         ))
     }
 }

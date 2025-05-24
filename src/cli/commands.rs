@@ -40,13 +40,16 @@ pub fn handle_list_command(app: &CliApp) -> crate::error::Result<i32> {
 pub fn setup_logging(verbose: bool, quiet: bool) {
     use env_logger::Env;
 
-    let env = Env::default().filter_or("RUST_LOG", if quiet {
-        "error"
-    } else if verbose {
-        "debug"
-    } else {
-        "info"
-    });
+    let env = Env::default().filter_or(
+        "RUST_LOG",
+        if quiet {
+            "error"
+        } else if verbose {
+            "debug"
+        } else {
+            "info"
+        },
+    );
 
     env_logger::init_from_env(env);
 }
