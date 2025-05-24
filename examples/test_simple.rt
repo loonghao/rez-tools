@@ -1,0 +1,5 @@
+command: echo "Hello from rez-tools!"
+short_help: Simple test without package dependencies
+requires:
+  - ~platform==windows
+run_detached: false

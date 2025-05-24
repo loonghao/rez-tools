@@ -1,0 +1,11 @@
+# rez-tools configuration file (TOML format)
+# Converted from: examples\reztoolsconfig.py
+
+# File extension for tool files
+extension = ".rt"
+
+# Paths to search for .rt files
+tool_paths = [
+    "C:\\Users\\hallo\\packages",
+    "examples"
+]

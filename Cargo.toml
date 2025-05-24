@@ -1,0 +1,75 @@
+[package]
+name = "rez-tools"
+version = "1.0.0"
+edition = "2021"
+authors = ["Long Hao <hal.long@outlook.com>"]
+description = "A suite tool command line for rez"
+license = "MIT"
+repository = "https://github.com/loonghao/rez-tools"
+readme = "README.md"
+keywords = ["rez", "cli", "tools"]
+categories = ["command-line-utilities"]
+
+[[bin]]
+name = "rt"
+path = "src/main.rs"
+
+[[bin]]
+name = "rt-convert-config"
+path = "src/bin/rt-convert-config.rs"
+
+[dependencies]
+clap = { version = "4.4", features = ["derive", "env"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9"
+tokio = { version = "1.0", features = ["full"] }
+anyhow = "1.0"
+log = "0.4"
+env_logger = "0.10"
+glob = "0.3"
+dirs = "5.0"
+regex = "1.10"
+serde_json = "1.0"
+shell-escape = "0.1"
+toml = "0.8"
+reqwest = { version = "0.11", features = ["json", "stream"] }
+futures-util = "0.3"
+flate2 = "1.0"
+tar = "0.4"
+zip = "0.6"
+
+[dev-dependencies]
+tempfile = "3.8"
+tokio-test = "0.4"
+assert_cmd = "2.0"
+predicates = "3.0"
+
+# Multi-platform build targets
+[target.x86_64-pc-windows-gnu]
+linker = "x86_64-w64-mingw32-gcc"
+
+[target.x86_64-unknown-linux-gnu]
+linker = "gcc"
+
+[target.x86_64-apple-darwin]
+linker = "clang"
+
+[target.aarch64-apple-darwin]
+linker = "clang"
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+opt-level = "z"  # Optimize for size
+
+[profile.dev]
+debug = true
+
+# Metadata for PyPI distribution
+[package.metadata.python]
+name = "rez-tools"
+module = "rez_tools"
+python-source = "python"
+python-packages = ["rez_tools"]

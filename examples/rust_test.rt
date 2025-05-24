@@ -1,0 +1,5 @@
+command: echo "Hello from Rust rez-tools!"
+short_help: Test tool for Rust implementation
+requires:
+  - python-3
+run_detached: false
