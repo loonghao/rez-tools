@@ -305,9 +305,9 @@ mod tests {
         let python_exe = temp_dir.path().join("python").join("python.exe");
         let scripts_dir = temp_dir.path().join("python").join("Scripts");
 
-        // Create directory structure
-        fs::create_dir_all(&scripts_dir).unwrap();
-        fs::write(&python_exe, "fake python").unwrap();
+        // Create directory structure using async fs
+        tokio::fs::create_dir_all(&scripts_dir).await.unwrap();
+        tokio::fs::write(&python_exe, "fake python").await.unwrap();
 
         let result = create_rez_production_marker(&python_exe).await;
         assert!(result.is_ok());
@@ -317,7 +317,7 @@ mod tests {
         assert!(marker_file.exists());
 
         // Check that it's empty
-        let content = fs::read_to_string(&marker_file).unwrap();
+        let content = tokio::fs::read_to_string(&marker_file).await.unwrap();
         assert!(content.is_empty());
     }
 
@@ -332,9 +332,9 @@ mod tests {
         let python_exe = temp_dir.path().join("python").join("bin").join("python3");
         let bin_dir = temp_dir.path().join("python").join("bin");
 
-        // Create directory structure
-        fs::create_dir_all(&bin_dir).unwrap();
-        fs::write(&python_exe, "fake python").unwrap();
+        // Create directory structure using async fs
+        tokio::fs::create_dir_all(&bin_dir).await.unwrap();
+        tokio::fs::write(&python_exe, "fake python").await.unwrap();
 
         let result = create_rez_production_marker(&python_exe).await;
         assert!(result.is_ok());
