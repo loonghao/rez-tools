@@ -7,6 +7,7 @@
 # Vim / Notepad++ temp files
 *~
 .*/
+!.github/
 *.egg-info
 # PyInstaller output
 build/
