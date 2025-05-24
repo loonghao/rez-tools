@@ -38,8 +38,6 @@ impl CliApp {
         Ok(Self { plugins })
     }
 
-
-
     /// Run the CLI application
     pub async fn run(&self) -> crate::error::Result<i32> {
         // Get command line arguments
@@ -86,7 +84,11 @@ impl CliApp {
     }
 
     /// Handle a plugin command execution
-    fn handle_plugin_command(&self, plugin: &crate::plugin::Plugin, args: &[String]) -> crate::error::Result<i32> {
+    fn handle_plugin_command(
+        &self,
+        plugin: &crate::plugin::Plugin,
+        args: &[String],
+    ) -> crate::error::Result<i32> {
         let mut ignore_cmd = false;
         let mut run_detached = false;
         let mut print_details = false;

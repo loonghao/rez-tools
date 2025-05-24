@@ -85,7 +85,9 @@ fn get_rez_config() -> Result<RezConfig> {
         let config_str = String::from_utf8_lossy(&output.stdout);
         parse_rez_config(&config_str)
     } else {
-        Err(RezToolsError::ConfigError("Failed to get rez config".to_string()))
+        Err(RezToolsError::ConfigError(
+            "Failed to get rez config".to_string(),
+        ))
     }
 }
 
@@ -104,7 +106,7 @@ fn parse_rez_config(config_str: &str) -> Result<RezConfig> {
             if let Some(paths_str) = line.strip_prefix("packages_path:") {
                 let paths_str = paths_str.trim();
                 if paths_str.starts_with('[') && paths_str.ends_with(']') {
-                    let paths_content = &paths_str[1..paths_str.len()-1];
+                    let paths_content = &paths_str[1..paths_str.len() - 1];
                     for path in paths_content.split(',') {
                         let path = path.trim().trim_matches('"').trim_matches('\'');
                         if !path.is_empty() {
@@ -132,7 +134,9 @@ fn detect_standalone_rez_installation() -> Result<RezEnvironment> {
     let rez_tools_dir = if let Some(home) = dirs::home_dir() {
         home.join(".rez-tools")
     } else {
-        return Err(RezToolsError::ConfigError("Cannot find home directory".to_string()));
+        return Err(RezToolsError::ConfigError(
+            "Cannot find home directory".to_string(),
+        ));
     };
 
     let install_dir = rez_tools_dir.join("python-build-standalone");
@@ -227,7 +231,7 @@ fn find_python_executable_in_dir(dir: &PathBuf) -> Result<PathBuf> {
     }
 
     Err(RezToolsError::ConfigError(
-        "Python executable not found in Python Build Standalone installation".to_string()
+        "Python executable not found in Python Build Standalone installation".to_string(),
     ))
 }
 
@@ -292,7 +296,10 @@ python_executable: "/usr/bin/python3"
         assert!(config.python_path.is_some());
         assert_eq!(config.packages_path[0], PathBuf::from("/path/to/packages"));
         assert_eq!(config.packages_path[1], PathBuf::from("/another/path"));
-        assert_eq!(config.python_path.unwrap(), PathBuf::from("/usr/bin/python3"));
+        assert_eq!(
+            config.python_path.unwrap(),
+            PathBuf::from("/usr/bin/python3")
+        );
     }
 
     #[test]
@@ -367,7 +374,10 @@ python_executable:
         // Don't create any Python executable
         let result = find_python_executable_in_dir(&python_dir);
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("Python executable not found"));
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("Python executable not found"));
     }
 
     #[test]

@@ -31,7 +31,9 @@ impl PythonStandalone {
 
         // Download the archive
         let archive_path = self.install_dir.join(&filename);
-        self.download_client.download_file(&download_url, &archive_path).await?;
+        self.download_client
+            .download_file(&download_url, &archive_path)
+            .await?;
 
         // Extract the archive
         let extract_dir = self.install_dir.join("python");
@@ -43,7 +45,10 @@ impl PythonStandalone {
         // Find the Python executable
         let python_exe = self.find_python_executable(&extract_dir, &platform)?;
 
-        info!("Python Build Standalone installed at: {}", python_exe.display());
+        info!(
+            "Python Build Standalone installed at: {}",
+            python_exe.display()
+        );
         Ok(python_exe)
     }
 
@@ -52,8 +57,10 @@ impl PythonStandalone {
         info!("Fetching Python Build Standalone release information...");
 
         // Get latest release info from GitHub API
-        let api_url = "https://api.github.com/repos/astral-sh/python-build-standalone/releases/latest";
-        let release_info: Value = self.download_client
+        let api_url =
+            "https://api.github.com/repos/astral-sh/python-build-standalone/releases/latest";
+        let release_info: Value = self
+            .download_client
             .download_bytes(api_url)
             .await
             .and_then(|bytes| {
@@ -63,7 +70,8 @@ impl PythonStandalone {
 
         // Find the appropriate asset for our platform
         let target_pattern = self.get_target_pattern(platform)?;
-        let assets = release_info["assets"].as_array()
+        let assets = release_info["assets"]
+            .as_array()
             .ok_or_else(|| RezToolsError::ConfigError("No assets found in release".to_string()))?;
 
         // Look for the best matching asset
@@ -82,10 +90,12 @@ impl PythonStandalone {
             ("linux", "x86_64") => "x86_64-unknown-linux-gnu-install_only",
             ("macos", "x86_64") => "x86_64-apple-darwin-install_only",
             ("macos", "aarch64") => "aarch64-apple-darwin-install_only",
-            _ => return Err(RezToolsError::ConfigError(format!(
-                "Unsupported platform: {}-{}",
-                platform.os, platform.arch
-            ))),
+            _ => {
+                return Err(RezToolsError::ConfigError(format!(
+                    "Unsupported platform: {}-{}",
+                    platform.os, platform.arch
+                )))
+            }
         };
 
         Ok(pattern.to_string())
@@ -103,11 +113,11 @@ impl PythonStandalone {
                 // Check if this asset matches our criteria
                 if asset_name.contains(target_pattern)
                     && asset_name.contains(version)
-                    && asset_name.ends_with(".tar.gz") {
-
-                    let download_url = asset["browser_download_url"]
-                        .as_str()
-                        .ok_or_else(|| RezToolsError::ConfigError("No download URL found".to_string()))?;
+                    && asset_name.ends_with(".tar.gz")
+                {
+                    let download_url = asset["browser_download_url"].as_str().ok_or_else(|| {
+                        RezToolsError::ConfigError("No download URL found".to_string())
+                    })?;
 
                     return Ok((download_url.to_string(), asset_name.to_string()));
                 }
@@ -121,7 +131,11 @@ impl PythonStandalone {
     }
 
     /// Find the Python executable in the extracted directory
-    fn find_python_executable(&self, extract_dir: &PathBuf, platform: &Platform) -> Result<PathBuf> {
+    fn find_python_executable(
+        &self,
+        extract_dir: &PathBuf,
+        platform: &Platform,
+    ) -> Result<PathBuf> {
         // Python Build Standalone extracts to a nested structure
         // Check for the nested python directory first
         let nested_python_dir = extract_dir.join("python");
@@ -164,14 +178,25 @@ impl PythonStandalone {
     }
 
     /// Recursively search for Python executable with depth limit
-    fn search_python_executable_limited(&self, dir: &PathBuf, platform: &Platform, current_depth: usize, max_depth: usize) -> Result<PathBuf> {
+    fn search_python_executable_limited(
+        &self,
+        dir: &PathBuf,
+        platform: &Platform,
+        current_depth: usize,
+        max_depth: usize,
+    ) -> Result<PathBuf> {
         let exe_names = if platform.os == "windows" {
             vec!["python.exe", "python3.exe"]
         } else {
             vec!["python3", "python"]
         };
 
-        fn search_recursive_limited(dir: &PathBuf, exe_names: &[&str], current_depth: usize, max_depth: usize) -> Option<PathBuf> {
+        fn search_recursive_limited(
+            dir: &PathBuf,
+            exe_names: &[&str],
+            current_depth: usize,
+            max_depth: usize,
+        ) -> Option<PathBuf> {
             if current_depth > max_depth {
                 return None;
             }
@@ -185,7 +210,10 @@ impl PythonStandalone {
                             if exe_names.contains(&filename) {
                                 // Prefer executables not in venv or test directories
                                 let path_str = path.to_string_lossy().to_lowercase();
-                                if !path_str.contains("venv") && !path_str.contains("test") && !path_str.contains("lib") {
+                                if !path_str.contains("venv")
+                                    && !path_str.contains("test")
+                                    && !path_str.contains("lib")
+                                {
                                     return Some(path);
                                 }
                             }
@@ -201,15 +229,21 @@ impl PythonStandalone {
                             // Skip certain directories that are unlikely to contain the main Python executable
                             if let Some(dir_name) = path.file_name().and_then(|s| s.to_str()) {
                                 let dir_name_lower = dir_name.to_lowercase();
-                                if dir_name_lower.contains("test") ||
-                                   dir_name_lower.contains("venv") ||
-                                   dir_name_lower.contains("lib") ||
-                                   dir_name_lower == "scripts" {
+                                if dir_name_lower.contains("test")
+                                    || dir_name_lower.contains("venv")
+                                    || dir_name_lower.contains("lib")
+                                    || dir_name_lower == "scripts"
+                                {
                                     continue;
                                 }
                             }
 
-                            if let Some(result) = search_recursive_limited(&path, exe_names, current_depth + 1, max_depth) {
+                            if let Some(result) = search_recursive_limited(
+                                &path,
+                                exe_names,
+                                current_depth + 1,
+                                max_depth,
+                            ) {
                                 return Some(result);
                             }
                         }
@@ -219,13 +253,12 @@ impl PythonStandalone {
             None
         }
 
-        search_recursive_limited(dir, &exe_names, current_depth, max_depth)
-            .ok_or_else(|| RezToolsError::ConfigError(
-                "Python executable not found in extracted archive".to_string()
-            ))
+        search_recursive_limited(dir, &exe_names, current_depth, max_depth).ok_or_else(|| {
+            RezToolsError::ConfigError(
+                "Python executable not found in extracted archive".to_string(),
+            )
+        })
     }
-
-
 
     /// Check if Python Build Standalone is already installed
     pub async fn is_installed(&self) -> bool {
@@ -251,7 +284,7 @@ impl PythonStandalone {
 
         if !python_dir.exists() {
             return Err(RezToolsError::ConfigError(
-                "Python Build Standalone not installed".to_string()
+                "Python Build Standalone not installed".to_string(),
             ));
         }
 
@@ -345,7 +378,10 @@ mod tests {
 
         let result = python_standalone.get_target_pattern(&platform);
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("Unsupported platform"));
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("Unsupported platform"));
     }
 
     #[test]
@@ -413,7 +449,10 @@ mod tests {
 
         let result = python_standalone.find_python_executable(&install_dir, &platform);
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("Python executable not found"));
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("Python executable not found"));
     }
 
     #[test]
@@ -423,7 +462,11 @@ mod tests {
         let python_standalone = PythonStandalone::new(install_dir.clone());
 
         // Create deep nested structure that should be skipped
-        let deep_dir = install_dir.join("level1").join("level2").join("level3").join("level4");
+        let deep_dir = install_dir
+            .join("level1")
+            .join("level2")
+            .join("level3")
+            .join("level4");
         fs::create_dir_all(&deep_dir).unwrap();
 
         let deep_python = deep_dir.join("python.exe");
@@ -440,7 +483,8 @@ mod tests {
             target_triple: "x86_64-pc-windows-msvc".to_string(),
         };
 
-        let result = python_standalone.search_python_executable_limited(&install_dir, &platform, 0, 3);
+        let result =
+            python_standalone.search_python_executable_limited(&install_dir, &platform, 0, 3);
         assert!(result.is_ok());
         // Should find the shallow one, not the deep one
         assert_eq!(result.unwrap(), shallow_python);
@@ -483,17 +527,18 @@ mod tests {
         let python_standalone = PythonStandalone::new(install_dir);
 
         // Mock asset data with no matching pattern
-        let assets = vec![
-            serde_json::json!({
-                "name": "some-other-file.tar.gz",
-                "browser_download_url": "https://example.com/other.tar.gz"
-            }),
-        ];
+        let assets = vec![serde_json::json!({
+            "name": "some-other-file.tar.gz",
+            "browser_download_url": "https://example.com/other.tar.gz"
+        })];
 
         let target_pattern = "x86_64-pc-windows-msvc-install_only";
         let result = python_standalone.find_best_asset(&assets, target_pattern);
 
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("No suitable Python Build Standalone found"));
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("No suitable Python Build Standalone found"));
     }
 }

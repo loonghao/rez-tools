@@ -24,7 +24,9 @@ impl fmt::Display for RezToolsError {
         match self {
             RezToolsError::ConfigError(msg) => write!(f, "Configuration error: {}", msg),
             RezToolsError::PluginParseError(msg) => write!(f, "Plugin parse error: {}", msg),
-            RezToolsError::PluginValidationError(msg) => write!(f, "Plugin validation error: {}", msg),
+            RezToolsError::PluginValidationError(msg) => {
+                write!(f, "Plugin validation error: {}", msg)
+            }
             RezToolsError::RezExecutionError(msg) => write!(f, "Rez execution error: {}", msg),
             RezToolsError::IoError(err) => write!(f, "IO error: {}", err),
             RezToolsError::YamlError(err) => write!(f, "YAML error: {}", err),

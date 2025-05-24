@@ -15,7 +15,11 @@ impl Extractor {
         let archive_path = archive_path.as_ref();
         let extract_to = extract_to.as_ref();
 
-        info!("Extracting {} to {}", archive_path.display(), extract_to.display());
+        info!(
+            "Extracting {} to {}",
+            archive_path.display(),
+            extract_to.display()
+        );
 
         // Ensure extraction directory exists
         fs::create_dir_all(extract_to).await?;
@@ -30,7 +34,8 @@ impl Extractor {
             "zip" => Self::extract_zip(archive_path, extract_to).await,
             "gz" | "tgz" => {
                 // Check if it's a .tar.gz
-                let file_name = archive_path.file_name()
+                let file_name = archive_path
+                    .file_name()
                     .and_then(|s| s.to_str())
                     .unwrap_or("");
                 if file_name.ends_with(".tar.gz") || file_name.ends_with(".tgz") {
@@ -65,15 +70,18 @@ impl Extractor {
         let extract_to = extract_to.to_path_buf();
 
         tokio::task::spawn_blocking(move || {
-            let file = std::fs::File::open(&archive_path)
-                .map_err(|e| RezToolsError::ConfigError(format!("Failed to open archive: {}", e)))?;
+            let file = std::fs::File::open(&archive_path).map_err(|e| {
+                RezToolsError::ConfigError(format!("Failed to open archive: {}", e))
+            })?;
 
-            let mut archive = zip::ZipArchive::new(file)
-                .map_err(|e| RezToolsError::ConfigError(format!("Failed to read ZIP archive: {}", e)))?;
+            let mut archive = zip::ZipArchive::new(file).map_err(|e| {
+                RezToolsError::ConfigError(format!("Failed to read ZIP archive: {}", e))
+            })?;
 
             for i in 0..archive.len() {
-                let mut file = archive.by_index(i)
-                    .map_err(|e| RezToolsError::ConfigError(format!("Failed to read ZIP entry: {}", e)))?;
+                let mut file = archive.by_index(i).map_err(|e| {
+                    RezToolsError::ConfigError(format!("Failed to read ZIP entry: {}", e))
+                })?;
 
                 let outpath = match file.enclosed_name() {
                     Some(path) => extract_to.join(path),
@@ -82,22 +90,29 @@ impl Extractor {
 
                 if file.name().ends_with('/') {
                     // Directory
-                    std::fs::create_dir_all(&outpath)
-                        .map_err(|e| RezToolsError::ConfigError(format!("Failed to create directory: {}", e)))?;
+                    std::fs::create_dir_all(&outpath).map_err(|e| {
+                        RezToolsError::ConfigError(format!("Failed to create directory: {}", e))
+                    })?;
                 } else {
                     // File
                     if let Some(p) = outpath.parent() {
                         if !p.exists() {
-                            std::fs::create_dir_all(p)
-                                .map_err(|e| RezToolsError::ConfigError(format!("Failed to create directory: {}", e)))?;
+                            std::fs::create_dir_all(p).map_err(|e| {
+                                RezToolsError::ConfigError(format!(
+                                    "Failed to create directory: {}",
+                                    e
+                                ))
+                            })?;
                         }
                     }
 
-                    let mut outfile = std::fs::File::create(&outpath)
-                        .map_err(|e| RezToolsError::ConfigError(format!("Failed to create file: {}", e)))?;
+                    let mut outfile = std::fs::File::create(&outpath).map_err(|e| {
+                        RezToolsError::ConfigError(format!("Failed to create file: {}", e))
+                    })?;
 
-                    std::io::copy(&mut file, &mut outfile)
-                        .map_err(|e| RezToolsError::ConfigError(format!("Failed to extract file: {}", e)))?;
+                    std::io::copy(&mut file, &mut outfile).map_err(|e| {
+                        RezToolsError::ConfigError(format!("Failed to extract file: {}", e))
+                    })?;
                 }
 
                 // Set permissions on Unix systems
@@ -106,13 +121,16 @@ impl Extractor {
                     use std::os::unix::fs::PermissionsExt;
                     if let Some(mode) = file.unix_mode() {
                         std::fs::set_permissions(&outpath, std::fs::Permissions::from_mode(mode))
-                            .map_err(|e| RezToolsError::ConfigError(format!("Failed to set permissions: {}", e)))?;
+                            .map_err(|e| {
+                            RezToolsError::ConfigError(format!("Failed to set permissions: {}", e))
+                        })?;
                     }
                 }
             }
 
             Ok::<(), RezToolsError>(())
-        }).await
+        })
+        .await
         .map_err(|e| RezToolsError::ConfigError(format!("Extraction task failed: {}", e)))??;
 
         info!("ZIP extraction completed");
@@ -134,17 +152,20 @@ impl Extractor {
         let extract_to = extract_to.to_path_buf();
 
         tokio::task::spawn_blocking(move || {
-            let file = std::fs::File::open(&archive_path)
-                .map_err(|e| RezToolsError::ConfigError(format!("Failed to open archive: {}", e)))?;
+            let file = std::fs::File::open(&archive_path).map_err(|e| {
+                RezToolsError::ConfigError(format!("Failed to open archive: {}", e))
+            })?;
 
             let decoder = flate2::read::GzDecoder::new(file);
             let mut archive = tar::Archive::new(decoder);
 
-            archive.unpack(&extract_to)
-                .map_err(|e| RezToolsError::ConfigError(format!("Failed to extract TAR.GZ archive: {}", e)))?;
+            archive.unpack(&extract_to).map_err(|e| {
+                RezToolsError::ConfigError(format!("Failed to extract TAR.GZ archive: {}", e))
+            })?;
 
             Ok::<(), RezToolsError>(())
-        }).await
+        })
+        .await
         .map_err(|e| RezToolsError::ConfigError(format!("Extraction task failed: {}", e)))??;
 
         info!("TAR.GZ extraction completed");
@@ -166,16 +187,19 @@ impl Extractor {
         let extract_to = extract_to.to_path_buf();
 
         tokio::task::spawn_blocking(move || {
-            let file = std::fs::File::open(&archive_path)
-                .map_err(|e| RezToolsError::ConfigError(format!("Failed to open archive: {}", e)))?;
+            let file = std::fs::File::open(&archive_path).map_err(|e| {
+                RezToolsError::ConfigError(format!("Failed to open archive: {}", e))
+            })?;
 
             let mut archive = tar::Archive::new(file);
 
-            archive.unpack(&extract_to)
-                .map_err(|e| RezToolsError::ConfigError(format!("Failed to extract TAR archive: {}", e)))?;
+            archive.unpack(&extract_to).map_err(|e| {
+                RezToolsError::ConfigError(format!("Failed to extract TAR archive: {}", e))
+            })?;
 
             Ok::<(), RezToolsError>(())
-        }).await
+        })
+        .await
         .map_err(|e| RezToolsError::ConfigError(format!("Extraction task failed: {}", e)))??;
 
         info!("TAR extraction completed");
@@ -198,7 +222,12 @@ mod tests {
 
         // Test TAR.GZ detection
         let tar_gz_path = PathBuf::from("test.tar.gz");
-        assert!(tar_gz_path.file_name().unwrap().to_str().unwrap().ends_with(".tar.gz"));
+        assert!(tar_gz_path
+            .file_name()
+            .unwrap()
+            .to_str()
+            .unwrap()
+            .ends_with(".tar.gz"));
 
         // Test TGZ detection
         let tgz_path = PathBuf::from("test.tgz");
@@ -220,7 +249,10 @@ mod tests {
 
         let result = Extractor::extract(&archive_path, &extract_to).await;
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("Unsupported archive format"));
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("Unsupported archive format"));
     }
 
     #[tokio::test]
@@ -260,29 +292,45 @@ mod tests {
         }
 
         let test_cases = vec![
-            TestCase { filename: "archive.zip", expected_type: "zip" },
-            TestCase { filename: "archive.tar.gz", expected_type: "tar.gz" },
-            TestCase { filename: "archive.tgz", expected_type: "tgz" },
-            TestCase { filename: "archive.tar", expected_type: "tar" },
-            TestCase { filename: "ARCHIVE.ZIP", expected_type: "zip" }, // Case insensitive
+            TestCase {
+                filename: "archive.zip",
+                expected_type: "zip",
+            },
+            TestCase {
+                filename: "archive.tar.gz",
+                expected_type: "tar.gz",
+            },
+            TestCase {
+                filename: "archive.tgz",
+                expected_type: "tgz",
+            },
+            TestCase {
+                filename: "archive.tar",
+                expected_type: "tar",
+            },
+            TestCase {
+                filename: "ARCHIVE.ZIP",
+                expected_type: "zip",
+            }, // Case insensitive
         ];
 
         for test_case in test_cases {
             let path = PathBuf::from(test_case.filename);
-            let extension = path.extension()
+            let extension = path
+                .extension()
                 .and_then(|s| s.to_str())
                 .unwrap_or("")
                 .to_lowercase();
 
-            let file_name = path.file_name()
-                .and_then(|s| s.to_str())
-                .unwrap_or("");
+            let file_name = path.file_name().and_then(|s| s.to_str()).unwrap_or("");
 
             match extension.as_str() {
                 "zip" => assert_eq!(test_case.expected_type, "zip"),
                 "gz" | "tgz" => {
                     if file_name.ends_with(".tar.gz") || file_name.ends_with(".tgz") {
-                        assert!(test_case.expected_type == "tar.gz" || test_case.expected_type == "tgz");
+                        assert!(
+                            test_case.expected_type == "tar.gz" || test_case.expected_type == "tgz"
+                        );
                     }
                 }
                 "tar" => assert_eq!(test_case.expected_type, "tar"),
@@ -295,7 +343,11 @@ mod tests {
     async fn test_extract_with_nested_paths() {
         let temp_dir = TempDir::new().unwrap();
         let archive_path = temp_dir.path().join("test.zip");
-        let extract_to = temp_dir.path().join("nested").join("deep").join("extracted");
+        let extract_to = temp_dir
+            .path()
+            .join("nested")
+            .join("deep")
+            .join("extracted");
 
         // Create a fake archive file
         fs::write(&archive_path, "fake archive content").unwrap();

@@ -17,7 +17,10 @@ pub fn load_config() -> Result<Config> {
     if let Some(home_dir) = dirs::home_dir() {
         let default_config = home_dir.join("reztoolsconfig.py");
         if default_config.exists() {
-            debug!("Loading config from default location: {}", default_config.display());
+            debug!(
+                "Loading config from default location: {}",
+                default_config.display()
+            );
             return load_config_from_file(&default_config);
         }
     }
@@ -71,7 +74,8 @@ fn execute_python_config(config_path: &Path) -> Result<Config> {
     use std::process::Command;
 
     // Create a Python script to execute the config and output JSON
-    let python_script = format!(r#"
+    let python_script = format!(
+        r#"
 import sys
 import json
 import os
@@ -111,8 +115,11 @@ print(json.dumps(result))
                 return parse_json_config(&stdout);
             }
             Ok(output) => {
-                debug!("Python execution failed with {}: {}",
-                       python_cmd, String::from_utf8_lossy(&output.stderr));
+                debug!(
+                    "Python execution failed with {}: {}",
+                    python_cmd,
+                    String::from_utf8_lossy(&output.stderr)
+                );
             }
             Err(e) => {
                 debug!("Failed to run {}: {}", python_cmd, e);
@@ -121,7 +128,7 @@ print(json.dumps(result))
     }
 
     Err(RezToolsError::ConfigError(
-        "No working Python interpreter found".to_string()
+        "No working Python interpreter found".to_string(),
     ))
 }
 
@@ -258,8 +265,9 @@ fn extract_string_value(line: &str) -> Option<String> {
     let line = line.trim();
 
     // Handle quoted strings
-    if (line.starts_with('"') && line.ends_with('"')) ||
-       (line.starts_with('\'') && line.ends_with('\'')) {
+    if (line.starts_with('"') && line.ends_with('"'))
+        || (line.starts_with('\'') && line.ends_with('\''))
+    {
         return Some(line[1..line.len() - 1].to_string());
     }
 
@@ -356,6 +364,9 @@ extension = ".rt"
     fn test_extract_string_value() {
         assert_eq!(extract_string_value("\"hello\""), Some("hello".to_string()));
         assert_eq!(extract_string_value("'world'"), Some("world".to_string()));
-        assert_eq!(extract_string_value("extension = \".rt\""), Some(".rt".to_string()));
+        assert_eq!(
+            extract_string_value("extension = \".rt\""),
+            Some(".rt".to_string())
+        );
     }
 }

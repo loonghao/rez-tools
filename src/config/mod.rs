@@ -15,11 +15,9 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            tool_paths: vec![
-                dirs::home_dir()
-                    .unwrap_or_else(|| PathBuf::from("."))
-                    .join("packages"),
-            ],
+            tool_paths: vec![dirs::home_dir()
+                .unwrap_or_else(|| PathBuf::from("."))
+                .join("packages")],
             extension: ".rt".to_string(),
         }
     }

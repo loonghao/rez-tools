@@ -34,6 +34,6 @@ pub mod plugin;
 pub mod rez;
 
 // Re-export commonly used types
+pub use config::Config;
 pub use error::{Result, RezToolsError};
 pub use plugin::Plugin;
-pub use config::Config;

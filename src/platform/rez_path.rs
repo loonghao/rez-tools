@@ -26,12 +26,15 @@ pub fn find_and_set_rez_path() -> Result<PathBuf> {
 
     // Set environment variable
     std::env::set_var(REZ_PATH_ENV, &rez_path);
-    info!("Set REZ_PATH environment variable to: {}", rez_path.display());
+    info!(
+        "Set REZ_PATH environment variable to: {}",
+        rez_path.display()
+    );
 
     // Cache the result
-    REZ_PATH_CACHE.set(Some(rez_path.clone())).map_err(|_| {
-        RezToolsError::ConfigError("Failed to cache rez path".to_string())
-    })?;
+    REZ_PATH_CACHE
+        .set(Some(rez_path.clone()))
+        .map_err(|_| RezToolsError::ConfigError("Failed to cache rez path".to_string()))?;
 
     Ok(rez_path)
 }
@@ -61,10 +64,16 @@ fn find_rez_executable() -> Result<PathBuf> {
     if let Ok(env_path) = std::env::var(REZ_PATH_ENV) {
         let path = PathBuf::from(env_path);
         if path.exists() {
-            debug!("Found rez via REZ_PATH environment variable: {}", path.display());
+            debug!(
+                "Found rez via REZ_PATH environment variable: {}",
+                path.display()
+            );
             return Ok(path);
         } else {
-            warn!("REZ_PATH environment variable points to non-existent path: {}", path.display());
+            warn!(
+                "REZ_PATH environment variable points to non-existent path: {}",
+                path.display()
+            );
         }
     }
 
@@ -93,7 +102,7 @@ fn find_rez_executable() -> Result<PathBuf> {
     }
 
     Err(RezToolsError::ConfigError(
-        "Rez executable not found. Please install rez or run 'rt install-rez'".to_string()
+        "Rez executable not found. Please install rez or run 'rt install-rez'".to_string(),
     ))
 }
 
@@ -107,8 +116,16 @@ fn find_rez_in_python_standalone() -> Result<PathBuf> {
         // Try to find rez script in the Python installation
         let possible_paths = if platform.os == "windows" {
             vec![
-                python_path.parent().unwrap().join("Scripts").join("rez.exe"),
-                python_path.parent().unwrap().join("Scripts").join("rez.bat"),
+                python_path
+                    .parent()
+                    .unwrap()
+                    .join("Scripts")
+                    .join("rez.exe"),
+                python_path
+                    .parent()
+                    .unwrap()
+                    .join("Scripts")
+                    .join("rez.bat"),
                 python_path.parent().unwrap().join("Scripts").join("rez"),
             ]
         } else {
@@ -128,7 +145,9 @@ fn find_rez_in_python_standalone() -> Result<PathBuf> {
         return Ok(python_path);
     }
 
-    Err(RezToolsError::ConfigError("No Python Build Standalone installation found".to_string()))
+    Err(RezToolsError::ConfigError(
+        "No Python Build Standalone installation found".to_string(),
+    ))
 }
 
 /// Find rez wrapper created by our installer
@@ -140,14 +159,20 @@ fn find_rez_wrapper() -> Result<PathBuf> {
     let bin_dir = rez_tools_dir.join("bin");
 
     let platform = Platform::detect();
-    let wrapper_name = if platform.os == "windows" { "rez.bat" } else { "rez" };
+    let wrapper_name = if platform.os == "windows" {
+        "rez.bat"
+    } else {
+        "rez"
+    };
     let wrapper_path = bin_dir.join(wrapper_name);
 
     if wrapper_path.exists() {
         return Ok(wrapper_path);
     }
 
-    Err(RezToolsError::ConfigError("Rez wrapper not found".to_string()))
+    Err(RezToolsError::ConfigError(
+        "Rez wrapper not found".to_string(),
+    ))
 }
 
 /// Find rez in system PATH
@@ -178,7 +203,9 @@ fn find_rez_in_system_path() -> Result<PathBuf> {
         }
     }
 
-    Err(RezToolsError::ConfigError("Rez not found in system PATH".to_string()))
+    Err(RezToolsError::ConfigError(
+        "Rez not found in system PATH".to_string(),
+    ))
 }
 
 /// Find rez in common installation locations
@@ -204,7 +231,9 @@ fn find_rez_in_common_locations() -> Result<PathBuf> {
         }
     }
 
-    Err(RezToolsError::ConfigError("Rez not found in common locations".to_string()))
+    Err(RezToolsError::ConfigError(
+        "Rez not found in common locations".to_string(),
+    ))
 }
 
 /// Get rez command for execution (handles python -m rez case)
@@ -212,7 +241,8 @@ pub fn get_rez_command() -> Result<Vec<String>> {
     let rez_path = get_rez_path()?;
 
     // Check if this is a Python executable (for python -m rez case)
-    if rez_path.file_name()
+    if rez_path
+        .file_name()
         .and_then(|name| name.to_str())
         .map(|name| name.starts_with("python"))
         .unwrap_or(false)
@@ -258,7 +288,8 @@ mod tests {
         fs::write(&python_exe, "fake python").unwrap();
 
         // Test the command generation logic directly
-        let command = if python_exe.file_name()
+        let command = if python_exe
+            .file_name()
             .and_then(|name| name.to_str())
             .map(|name| name.starts_with("python"))
             .unwrap_or(false)
@@ -286,7 +317,8 @@ mod tests {
         fs::write(&rez_exe, "fake rez").unwrap();
 
         // Test the command generation logic directly
-        let command = if rez_exe.file_name()
+        let command = if rez_exe
+            .file_name()
             .and_then(|name| name.to_str())
             .map(|name| name.starts_with("python"))
             .unwrap_or(false)

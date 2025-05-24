@@ -8,9 +8,9 @@ use tempfile::TempDir;
 fn test_rt_help() {
     let mut cmd = Command::cargo_bin("rt").unwrap();
     cmd.arg("--help");
-    cmd.assert()
-        .success()
-        .stdout(predicate::str::contains("A suite tool command line for rez"));
+    cmd.assert().success().stdout(predicate::str::contains(
+        "A suite tool command line for rez",
+    ));
 }
 
 #[test]
@@ -26,9 +26,10 @@ fn test_rt_version() {
 fn test_rt_list_empty() {
     let mut cmd = Command::cargo_bin("rt").unwrap();
     cmd.arg("list");
-    cmd.assert()
-        .success()
-        .stdout(predicate::str::contains("No plugins found").or(predicate::str::contains("Available plugins")));
+    cmd.assert().success().stdout(
+        predicate::str::contains("No plugins found")
+            .or(predicate::str::contains("Available plugins")),
+    );
 }
 
 #[test]
@@ -47,7 +48,8 @@ short_help: Test tool for integration testing
 requires:
   - test-package
 "#
-    ).unwrap();
+    )
+    .unwrap();
 
     // Create a config file
     let config_file = temp_path.join("reztoolsconfig.py");
@@ -62,7 +64,8 @@ tool_paths = [
 extension = ".rt"
 "#,
         temp_path.to_string_lossy().replace('\\', "\\\\")
-    ).unwrap();
+    )
+    .unwrap();
 
     // Test with the config
     let mut cmd = Command::cargo_bin("rt").unwrap();
@@ -89,7 +92,8 @@ short_help: Test tool
 requires:
   - test-package
 "#
-    ).unwrap();
+    )
+    .unwrap();
 
     // Create a config file
     let config_file = temp_path.join("reztoolsconfig.py");
@@ -104,7 +108,8 @@ tool_paths = [
 extension = ".rt"
 "#,
         temp_path.to_string_lossy().replace('\\', "\\\\")
-    ).unwrap();
+    )
+    .unwrap();
 
     // Test plugin --print
     let mut cmd = Command::cargo_bin("rt").unwrap();
@@ -131,7 +136,8 @@ command: echo "test"
 requires:
   - test-package
 "#
-    ).unwrap();
+    )
+    .unwrap();
 
     // Create a config file
     let config_file = temp_path.join("reztoolsconfig.py");
@@ -146,7 +152,8 @@ tool_paths = [
 extension = ".rt"
 "#,
         temp_path.to_string_lossy().replace('\\', "\\\\")
-    ).unwrap();
+    )
+    .unwrap();
 
     // Test that invalid plugin is not loaded
     let mut cmd = Command::cargo_bin("rt").unwrap();
