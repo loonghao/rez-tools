@@ -1,0 +1,75 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rez-tools"
+version = "0.1.0"
+description = "A high-performance suite tool command line for rez"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Long Hao", email = "hal.long@outlook.com"}
+]
+keywords = ["rez", "cli", "tools", "vfx", "pipeline"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: System :: Software Distribution",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "requests>=2.25.0",
+    "platformdirs>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov",
+    "black",
+    "flake8",
+    "mypy",
+]
+
+[project.urls]
+Homepage = "https://github.com/loonghao/rez-tools"
+Repository = "https://github.com/loonghao/rez-tools"
+Documentation = "https://github.com/loonghao/rez-tools#readme"
+"Bug Tracker" = "https://github.com/loonghao/rez-tools/issues"
+
+[project.scripts]
+rt = "rez_tools.cli:main"
+rt-convert-config = "rez_tools.cli:convert_config"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["rez_tools*"]
+
+[tool.setuptools.package-data]
+rez_tools = ["py.typed", "binaries/*"]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]

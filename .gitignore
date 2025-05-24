@@ -23,3 +23,6 @@ result/
 
 # Docs
 docs/_build/
+
+# Rust
+target/
