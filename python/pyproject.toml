@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rez-tools"
-version = "0.1.0"
+version = "1.0.0"
 description = "A high-performance suite tool command line for rez"
 readme = "README.md"
 license = {text = "MIT"}
@@ -29,12 +29,12 @@ classifiers = [
 requires-python = ">=3.8"
 dependencies = [
     "requests>=2.25.0",
-    "platformdirs>=2.0.0",
+    "platformdirs>=4.3.8",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=6.0",
+    "pytest>=8.3.0",
     "pytest-cov",
     "black",
     "flake8",
