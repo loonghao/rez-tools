@@ -223,4 +223,3 @@ jobs:
         draft: false
         prerelease: false
         files: release-artifacts/*/*
-
