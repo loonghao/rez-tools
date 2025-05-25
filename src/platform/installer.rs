@@ -284,9 +284,16 @@ async fn create_rez_production_marker(python_exe: &Path) -> Result<()> {
         .ok_or_else(|| RezToolsError::ConfigError("Invalid Python executable path".to_string()))?;
 
     let scripts_dir = if platform.os == "windows" {
+        // On Windows, python.exe is typically in the root, Scripts is a subdirectory
         python_dir.join("Scripts")
     } else {
-        python_dir.join("bin")
+        // On Unix, if python is already in bin/, use that directory
+        // Otherwise, add bin/ subdirectory
+        if python_dir.file_name().and_then(|n| n.to_str()) == Some("bin") {
+            python_dir.to_path_buf()
+        } else {
+            python_dir.join("bin")
+        }
     };
 
     let marker_file = scripts_dir.join(".rez_production_install");
@@ -423,6 +430,41 @@ mod tests {
 
         let result = create_rez_production_marker(&invalid_python_exe).await;
         assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    #[cfg(not(windows))]
+    async fn test_create_rez_production_marker_unix_root_python() {
+        // Test case where python is in the root directory (not in bin/)
+        let temp_dir = TempDir::new().unwrap();
+        let python_exe = temp_dir.path().join("python").join("python3");
+        let bin_dir = temp_dir.path().join("python").join("bin");
+
+        // Create directory structure using async fs
+        tokio::fs::create_dir_all(python_exe.parent().unwrap())
+            .await
+            .unwrap();
+        tokio::fs::create_dir_all(&bin_dir).await.unwrap();
+        tokio::fs::write(&python_exe, "fake python").await.unwrap();
+
+        let result = create_rez_production_marker(&python_exe).await;
+        assert!(
+            result.is_ok(),
+            "Failed to create rez production marker: {:?}",
+            result.err()
+        );
+
+        // Check that marker file was created in the bin subdirectory
+        let marker_file = bin_dir.join(".rez_production_install");
+        assert!(
+            marker_file.exists(),
+            "Marker file should exist at: {}",
+            marker_file.display()
+        );
+
+        // Verify the marker file is empty
+        let content = tokio::fs::read_to_string(&marker_file).await.unwrap();
+        assert!(content.is_empty(), "Marker file should be empty");
     }
 
     #[test]
