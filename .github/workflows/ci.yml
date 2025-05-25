@@ -9,6 +9,8 @@ on:
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
+  # Pin Rust version to avoid compatibility issues
+  RUST_VERSION: "1.86.0"
 
 jobs:
   # Code quality checks
@@ -22,6 +24,7 @@ jobs:
     - name: Install stable toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
+        toolchain: ${{ env.RUST_VERSION }}
         components: rustfmt, clippy
 
     - name: Cache cargo
@@ -68,7 +71,7 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        toolchain: ${{ matrix.rust }}
+        toolchain: ${{ matrix.rust == 'stable' && env.RUST_VERSION || matrix.rust }}
 
     - name: Cache cargo
       uses: actions/cache@v4
@@ -129,6 +132,7 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
+        toolchain: ${{ env.RUST_VERSION }}
         targets: ${{ matrix.target }}
 
     - name: Cache cargo
@@ -168,6 +172,8 @@ jobs:
 
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: ${{ env.RUST_VERSION }}
 
     - name: Install cargo-audit
       run: cargo install cargo-audit

@@ -1,7 +1,7 @@
 use crate::error::{Result, RezToolsError};
 use crate::platform::{python_standalone::PythonStandalone, Platform};
 use log::{debug, info, warn};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use tokio::fs;
 use tokio::process::Command as AsyncCommand;
 
@@ -46,7 +46,7 @@ async fn try_install_with_uv() -> Result<()> {
     let venv_path = get_rez_tools_dir().join("venv");
 
     let output = AsyncCommand::new("uv")
-        .args(&["venv", venv_path.to_string_lossy().as_ref()])
+        .args(["venv", venv_path.to_string_lossy().as_ref()])
         .output()
         .await
         .map_err(|e| RezToolsError::ConfigError(format!("Failed to create venv: {}", e)))?;
@@ -61,7 +61,7 @@ async fn try_install_with_uv() -> Result<()> {
     // Install rez in the virtual environment
     let pip_path = get_venv_pip_path(&venv_path)?;
     let output = AsyncCommand::new(&pip_path)
-        .args(&["install", "rez"])
+        .args(["install", "rez"])
         .output()
         .await
         .map_err(|e| RezToolsError::ConfigError(format!("Failed to install rez: {}", e)))?;
@@ -151,7 +151,7 @@ async fn install_rez_with_python_exe(python_exe: &PathBuf) -> Result<()> {
     info!("Installing rez using Python: {}", python_exe.display());
 
     let output = AsyncCommand::new(python_exe)
-        .args(&["-m", "pip", "install", "rez"])
+        .args(["-m", "pip", "install", "rez"])
         .output()
         .await
         .map_err(|e| RezToolsError::ConfigError(format!("Failed to run pip: {}", e)))?;
@@ -174,7 +174,7 @@ async fn install_rez_with_python_exe(python_exe: &PathBuf) -> Result<()> {
 }
 
 /// Create a rez wrapper script that uses our Python installation
-async fn create_rez_wrapper(python_exe: &PathBuf) -> Result<()> {
+async fn create_rez_wrapper(python_exe: &Path) -> Result<()> {
     let platform = Platform::detect();
     let rez_tools_dir = get_rez_tools_dir();
     let bin_dir = rez_tools_dir.join("bin");
@@ -203,7 +203,7 @@ async fn create_rez_wrapper(python_exe: &PathBuf) -> Result<()> {
     // Make executable on Unix systems
     if platform.os != "windows" {
         let output = AsyncCommand::new("chmod")
-            .args(&["+x", &wrapper_path.to_string_lossy()])
+            .args(["+x", &wrapper_path.to_string_lossy()])
             .output()
             .await?;
 
@@ -232,7 +232,7 @@ async fn create_rez_wrapper(python_exe: &PathBuf) -> Result<()> {
 }
 
 /// Create .rez_production_install marker file to avoid pip installation warnings
-async fn create_rez_production_marker(python_exe: &PathBuf) -> Result<()> {
+async fn create_rez_production_marker(python_exe: &Path) -> Result<()> {
     let platform = Platform::detect();
 
     // Find the Scripts/bin directory where rez is installed
@@ -270,7 +270,7 @@ fn get_rez_tools_dir() -> PathBuf {
 }
 
 /// Get pip path in virtual environment
-fn get_venv_pip_path(venv_path: &PathBuf) -> Result<PathBuf> {
+fn get_venv_pip_path(venv_path: &Path) -> Result<PathBuf> {
     let platform = Platform::detect();
     let pip_path = if platform.os == "windows" {
         venv_path.join("Scripts").join("pip.exe")

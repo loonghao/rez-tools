@@ -13,6 +13,8 @@ on:
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
+  # Pin Rust version to avoid compatibility issues
+  RUST_VERSION: "1.86.0"
 
 jobs:
   # Determine if this is a release commit
@@ -85,7 +87,7 @@ jobs:
   build-release:
     name: Build Release
     runs-on: ${{ matrix.os }}
-    needs: version-bump
+    needs: [check-release, version-bump]
     if: needs.check-release.outputs.should_release == 'true'
     strategy:
       fail-fast: false
@@ -117,6 +119,7 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
+        toolchain: ${{ env.RUST_VERSION }}
         targets: ${{ matrix.target }}
 
     - name: Cache cargo
@@ -160,10 +163,8 @@ jobs:
   create-github-release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
-    needs: [version-bump, build-release]
+    needs: [check-release, version-bump, build-release]
     if: needs.check-release.outputs.should_release == 'true'
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -204,48 +205,29 @@ jobs:
         echo "* **macOS (Intel)**: rt-macos-x86_64.tar.gz" >> release_notes.md
         echo "* **macOS (Apple Silicon)**: rt-macos-aarch64.tar.gz" >> release_notes.md
 
+    - name: Download all release artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: release-artifacts/
+
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ needs.version-bump.outputs.tag }}
-        release_name: "rez-tools ${{ needs.version-bump.outputs.tag }}"
+        name: "rez-tools ${{ needs.version-bump.outputs.tag }}"
         body_path: release_notes.md
         draft: false
         prerelease: false
-
-  # Upload release assets
-  upload-release-assets:
-    name: Upload Release Assets
-    runs-on: ubuntu-latest
-    needs: [create-github-release, build-release]
-    if: needs.check-release.outputs.should_release == 'true'
-    strategy:
-      matrix:
-        asset_name: [rt-linux-x86_64, rt-windows-x86_64.exe, rt-macos-x86_64, rt-macos-aarch64]
-    steps:
-    - name: Download artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: ${{ matrix.asset_name }}
-
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ needs.create-github-release.outputs.upload_url }}
-        asset_path: ${{ matrix.asset_name }}.${{ contains(matrix.asset_name, 'windows') && 'zip' || 'tar.gz' }}
-        asset_name: ${{ matrix.asset_name }}.${{ contains(matrix.asset_name, 'windows') && 'zip' || 'tar.gz' }}
-        asset_content_type: application/octet-stream
+        files: release-artifacts/*/*
 
   # Build and publish Python package to PyPI
   publish-pypi:
     name: Publish to PyPI
     runs-on: ubuntu-latest
-    needs: [version-bump, build-release]
+    needs: [check-release, version-bump, build-release]
     if: needs.check-release.outputs.should_release == 'true'
     steps:
     - name: Checkout sources

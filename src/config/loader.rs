@@ -295,15 +295,15 @@ fn extract_path_from_line(line: &str) -> Option<String> {
     }
 
     // Remove leading comma if present
-    let line = if line.starts_with(',') {
-        line[1..].trim()
+    let line = if let Some(stripped) = line.strip_prefix(',') {
+        stripped.trim()
     } else {
         line
     };
 
     // Remove trailing comma if present
-    let line = if line.ends_with(',') {
-        line[..line.len() - 1].trim()
+    let line = if let Some(stripped) = line.strip_suffix(',') {
+        stripped.trim()
     } else {
         line
     };
@@ -318,9 +318,9 @@ fn expand_path(path: &str) -> String {
         if let Some(start) = path.find('"') {
             if let Some(end) = path.rfind('"') {
                 let inner_path = &path[start + 1..end];
-                if inner_path.starts_with("~/") {
+                if let Some(stripped) = inner_path.strip_prefix("~/") {
                     if let Some(home) = dirs::home_dir() {
-                        return home.join(&inner_path[2..]).to_string_lossy().to_string();
+                        return home.join(stripped).to_string_lossy().to_string();
                     }
                 }
                 return inner_path.to_string();
