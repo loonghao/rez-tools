@@ -99,14 +99,6 @@ jobs:
           ${{ runner.os }}-${{ matrix.rust }}-cargo-
           ${{ runner.os }}-cargo-
 
-    - name: Install Python (VFX Platform CY2024 standard)
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-
-    - name: Install uv (for integration tests)
-      run: pip install uv
-
     - name: Run unit tests
       run: cargo test --verbose --all-features
 
