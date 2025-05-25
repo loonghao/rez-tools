@@ -202,13 +202,54 @@ async fn create_rez_wrapper(python_exe: &Path) -> Result<()> {
 
     // Make executable on Unix systems
     if platform.os != "windows" {
-        let output = AsyncCommand::new("chmod")
-            .args(["+x", &wrapper_path.to_string_lossy()])
-            .output()
-            .await?;
+        // Try to set executable permissions using Rust's built-in methods first
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            if let Ok(metadata) = fs::metadata(&wrapper_path).await {
+                let mut perms = metadata.permissions();
+                perms.set_mode(perms.mode() | 0o755); // Add execute permissions
+                if let Err(e) = fs::set_permissions(&wrapper_path, perms).await {
+                    debug!("Failed to set permissions using Rust API: {}", e);
 
-        if !output.status.success() {
-            warn!("Failed to make rez wrapper executable");
+                    // Fallback to chmod command
+                    match AsyncCommand::new("chmod")
+                        .args(["+x", &wrapper_path.to_string_lossy()])
+                        .output()
+                        .await
+                    {
+                        Ok(output) if output.status.success() => {
+                            debug!("Successfully set executable permissions using chmod");
+                        }
+                        Ok(_) => {
+                            warn!("chmod command failed to set executable permissions");
+                        }
+                        Err(e) => {
+                            warn!("Failed to run chmod command: {}", e);
+                        }
+                    }
+                }
+            }
+        }
+
+        // On non-Unix systems that are not Windows, try chmod as fallback
+        #[cfg(not(any(unix, windows)))]
+        {
+            match AsyncCommand::new("chmod")
+                .args(["+x", &wrapper_path.to_string_lossy()])
+                .output()
+                .await
+            {
+                Ok(output) if output.status.success() => {
+                    debug!("Successfully set executable permissions using chmod");
+                }
+                Ok(_) => {
+                    warn!("chmod command failed to set executable permissions");
+                }
+                Err(e) => {
+                    warn!("Failed to run chmod command: {}", e);
+                }
+            }
         }
     }
 
@@ -292,6 +333,18 @@ mod tests {
     use super::*;
     use std::fs;
     use tempfile::TempDir;
+    use tokio::time::{timeout, Duration};
+
+    // Helper function to run async tests with timeout
+    #[allow(dead_code)]
+    async fn with_timeout<F, T>(future: F) -> Result<T>
+    where
+        F: std::future::Future<Output = Result<T>>,
+    {
+        timeout(Duration::from_secs(10), future)
+            .await
+            .map_err(|_| RezToolsError::ConfigError("Test timeout".to_string()))?
+    }
 
     #[test]
     fn test_get_rez_tools_dir() {
@@ -337,11 +390,16 @@ mod tests {
         tokio::fs::write(&python_exe, "fake python").await.unwrap();
 
         let result = create_rez_production_marker(&python_exe).await;
-        assert!(result.is_ok());
+        assert!(result.is_ok(), "Failed to create rez production marker: {:?}", result.err());
 
         // Check that marker file was created
         let marker_file = bin_dir.join(".rez_production_install");
-        assert!(tokio::fs::try_exists(&marker_file).await.unwrap());
+        assert!(tokio::fs::try_exists(&marker_file).await.unwrap(),
+                "Marker file should exist at: {}", marker_file.display());
+
+        // Verify the marker file is empty
+        let content = tokio::fs::read_to_string(&marker_file).await.unwrap();
+        assert!(content.is_empty(), "Marker file should be empty");
     }
 
     #[tokio::test]
@@ -354,6 +412,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(windows)]
     fn test_get_venv_pip_path_windows() {
         let temp_dir = TempDir::new().unwrap();
         let venv_path = temp_dir.path().to_path_buf();
@@ -364,14 +423,13 @@ mod tests {
         fs::create_dir_all(&scripts_dir).unwrap();
         fs::write(&pip_exe, "fake pip").unwrap();
 
-        if cfg!(windows) {
-            let result = get_venv_pip_path(&venv_path);
-            assert!(result.is_ok());
-            assert_eq!(result.unwrap(), pip_exe);
-        }
+        let result = get_venv_pip_path(&venv_path);
+        assert!(result.is_ok(), "Should find pip.exe on Windows: {:?}", result.err());
+        assert_eq!(result.unwrap(), pip_exe);
     }
 
     #[test]
+    #[cfg(not(windows))]
     fn test_get_venv_pip_path_unix() {
         let temp_dir = TempDir::new().unwrap();
         let venv_path = temp_dir.path().to_path_buf();
@@ -382,11 +440,9 @@ mod tests {
         fs::create_dir_all(&bin_dir).unwrap();
         fs::write(&pip_exe, "fake pip").unwrap();
 
-        if !cfg!(windows) {
-            let result = get_venv_pip_path(&venv_path);
-            assert!(result.is_ok());
-            assert_eq!(result.unwrap(), pip_exe);
-        }
+        let result = get_venv_pip_path(&venv_path);
+        assert!(result.is_ok(), "Should find pip on Unix systems: {:?}", result.err());
+        assert_eq!(result.unwrap(), pip_exe);
     }
 
     #[test]
