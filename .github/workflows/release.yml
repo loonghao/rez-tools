@@ -87,7 +87,7 @@ jobs:
   build-release:
     name: Build Release
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30  # Add timeout for release builds
+    timeout-minutes: 60  # Increase timeout for release builds
     needs: [check-release, version-bump]
     if: needs.check-release.outputs.should_release == 'true'
     strategy:
