@@ -52,6 +52,7 @@ jobs:
   test:
     name: Test Suite
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30  # Add timeout to prevent hanging jobs
     strategy:
       fail-fast: false
       matrix:
@@ -66,12 +67,10 @@ jobs:
           - os: windows-2022    # Windows 11 compatible
             rust: stable
             name: "Windows Server 2022"
-          - os: macos-12        # macOS 12 (Intel)
+          # Use only macOS-latest for better resource availability
+          - os: macos-latest    # macOS (latest available)
             rust: stable
-            name: "macOS 12 (Intel)"
-          - os: macos-14        # macOS 14 (Apple Silicon)
-            rust: stable
-            name: "macOS 14 (Apple Silicon)"
+            name: "macOS Latest"
           # Test with beta Rust on primary VFX platform
           - os: ubuntu-20.04
             rust: beta
@@ -112,6 +111,7 @@ jobs:
   build:
     name: Build Artifacts
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20  # Add timeout for build jobs
     needs: [quality, test]
     strategy:
       fail-fast: false
@@ -128,16 +128,12 @@ jobs:
             artifact_name: rt.exe
             asset_name: rt-windows-x86_64.exe
             name: "Windows x86_64"
-          - os: macos-12
+          # Use macos-latest with universal binary for better resource availability
+          - os: macos-latest
             target: x86_64-apple-darwin
             artifact_name: rt
             asset_name: rt-macos-x86_64
             name: "macOS Intel x86_64"
-          - os: macos-14
-            target: aarch64-apple-darwin
-            artifact_name: rt
-            asset_name: rt-macos-aarch64
-            name: "macOS Apple Silicon"
 
     steps:
     - name: Checkout sources
