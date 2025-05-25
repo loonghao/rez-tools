@@ -1,6 +1,8 @@
 use crate::error::{Result, RezToolsError};
 use crate::platform::{python_standalone::PythonStandalone, Platform};
-use log::{debug, info, warn};
+#[cfg(not(windows))]
+use log::warn;
+use log::{debug, info};
 use std::path::{Path, PathBuf};
 use tokio::fs;
 use tokio::process::Command as AsyncCommand;
@@ -290,7 +292,7 @@ async fn create_rez_production_marker(python_exe: &Path) -> Result<()> {
     let marker_file = scripts_dir.join(".rez_production_install");
 
     // Create the marker file (empty file)
-    fs::write(&marker_file, "").await?;
+    tokio::fs::write(&marker_file, "").await?;
 
     info!(
         "Created rez production install marker: {}",
@@ -353,7 +355,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_create_rez_production_marker() {
+    #[cfg(windows)]
+    async fn test_create_rez_production_marker_windows() {
         let temp_dir = TempDir::new().unwrap();
         let python_exe = temp_dir.path().join("python").join("python.exe");
         let scripts_dir = temp_dir.path().join("python").join("Scripts");
@@ -363,24 +366,28 @@ mod tests {
         tokio::fs::write(&python_exe, "fake python").await.unwrap();
 
         let result = create_rez_production_marker(&python_exe).await;
-        assert!(result.is_ok());
+        assert!(
+            result.is_ok(),
+            "Failed to create rez production marker: {:?}",
+            result.err()
+        );
 
         // Check that marker file was created
         let marker_file = scripts_dir.join(".rez_production_install");
-        assert!(tokio::fs::try_exists(&marker_file).await.unwrap());
+        assert!(
+            tokio::fs::try_exists(&marker_file).await.unwrap(),
+            "Marker file should exist at: {}",
+            marker_file.display()
+        );
 
         // Check that it's empty
         let content = tokio::fs::read_to_string(&marker_file).await.unwrap();
-        assert!(content.is_empty());
+        assert!(content.is_empty(), "Marker file should be empty");
     }
 
     #[tokio::test]
+    #[cfg(not(windows))]
     async fn test_create_rez_production_marker_unix() {
-        // Skip this test on Windows since it tests Unix-specific behavior
-        if cfg!(windows) {
-            return;
-        }
-
         let temp_dir = TempDir::new().unwrap();
         let python_exe = temp_dir.path().join("python").join("bin").join("python3");
         let bin_dir = temp_dir.path().join("python").join("bin");
@@ -390,12 +397,19 @@ mod tests {
         tokio::fs::write(&python_exe, "fake python").await.unwrap();
 
         let result = create_rez_production_marker(&python_exe).await;
-        assert!(result.is_ok(), "Failed to create rez production marker: {:?}", result.err());
+        assert!(
+            result.is_ok(),
+            "Failed to create rez production marker: {:?}",
+            result.err()
+        );
 
         // Check that marker file was created
         let marker_file = bin_dir.join(".rez_production_install");
-        assert!(tokio::fs::try_exists(&marker_file).await.unwrap(),
-                "Marker file should exist at: {}", marker_file.display());
+        assert!(
+            tokio::fs::try_exists(&marker_file).await.unwrap(),
+            "Marker file should exist at: {}",
+            marker_file.display()
+        );
 
         // Verify the marker file is empty
         let content = tokio::fs::read_to_string(&marker_file).await.unwrap();
@@ -424,7 +438,11 @@ mod tests {
         fs::write(&pip_exe, "fake pip").unwrap();
 
         let result = get_venv_pip_path(&venv_path);
-        assert!(result.is_ok(), "Should find pip.exe on Windows: {:?}", result.err());
+        assert!(
+            result.is_ok(),
+            "Should find pip.exe on Windows: {:?}",
+            result.err()
+        );
         assert_eq!(result.unwrap(), pip_exe);
     }
 
@@ -441,7 +459,11 @@ mod tests {
         fs::write(&pip_exe, "fake pip").unwrap();
 
         let result = get_venv_pip_path(&venv_path);
-        assert!(result.is_ok(), "Should find pip on Unix systems: {:?}", result.err());
+        assert!(
+            result.is_ok(),
+            "Should find pip on Unix systems: {:?}",
+            result.err()
+        );
         assert_eq!(result.unwrap(), pip_exe);
     }
 

@@ -13,8 +13,8 @@ on:
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
-  # Pin Rust version to avoid compatibility issues
-  RUST_VERSION: "1.86.0"
+  # Pin Rust version for consistency across environments
+  RUST_VERSION: "1.87.0"
 
 jobs:
   # Determine if this is a release commit

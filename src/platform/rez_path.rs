@@ -182,10 +182,7 @@ fn find_rez_in_system_path() -> Result<PathBuf> {
         ("which", "rez")
     };
 
-    match std::process::Command::new(cmd)
-        .arg(arg)
-        .output()
-    {
+    match std::process::Command::new(cmd).arg(arg).output() {
         Ok(output) if output.status.success() => {
             let output_str = String::from_utf8_lossy(&output.stdout);
             let path_str = output_str.lines().next().unwrap_or("").trim();
@@ -210,7 +207,8 @@ fn find_rez_in_system_path() -> Result<PathBuf> {
         Err(e) => {
             debug!("Failed to run {} command: {}", cmd, e);
             Err(RezToolsError::ConfigError(format!(
-                "Failed to search PATH (command '{}' not available): {}", cmd, e
+                "Failed to search PATH (command '{}' not available): {}",
+                cmd, e
             )))
         }
     }
@@ -279,11 +277,18 @@ mod tests {
         // We don't assert success/failure since it depends on the system
         match result {
             Ok(path) => {
-                assert!(path.exists(), "Found rez path should exist: {}", path.display());
+                assert!(
+                    path.exists(),
+                    "Found rez path should exist: {}",
+                    path.display()
+                );
                 println!("Found rez in system PATH: {}", path.display());
             }
             Err(e) => {
-                println!("Rez not found in system PATH (expected on some systems): {}", e);
+                println!(
+                    "Rez not found in system PATH (expected on some systems): {}",
+                    e
+                );
                 // This is acceptable - not all systems have rez installed
             }
         }

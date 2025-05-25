@@ -49,7 +49,10 @@ mod tests {
         // Verify platform detection works on all supported platforms
         assert!(!platform.os.is_empty(), "OS should be detected");
         assert!(!platform.arch.is_empty(), "Architecture should be detected");
-        assert!(!platform.target_triple.is_empty(), "Target triple should be generated");
+        assert!(
+            !platform.target_triple.is_empty(),
+            "Target triple should be generated"
+        );
 
         // Verify we're on a supported platform
         let supported_platforms = [
@@ -59,13 +62,15 @@ mod tests {
             ("macos", "aarch64"),
         ];
 
-        let is_supported = supported_platforms.iter().any(|(os, arch)| {
-            platform.os == *os && platform.arch == *arch
-        });
+        let is_supported = supported_platforms
+            .iter()
+            .any(|(os, arch)| platform.os == *os && platform.arch == *arch);
 
-        assert!(is_supported,
-                "Platform {}-{} should be supported",
-                platform.os, platform.arch);
+        assert!(
+            is_supported,
+            "Platform {}-{} should be supported",
+            platform.os, platform.arch
+        );
     }
 
     #[test]
@@ -76,7 +81,7 @@ mod tests {
 
         let io_error = RezToolsError::IoError(std::io::Error::new(
             std::io::ErrorKind::NotFound,
-            "test file not found"
+            "test file not found",
         ));
         assert!(io_error.to_string().contains("test file not found"));
     }
