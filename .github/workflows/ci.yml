@@ -11,6 +11,9 @@ env:
   RUST_BACKTRACE: 1
   # Pin Rust version to avoid compatibility issues
   RUST_VERSION: "1.86.0"
+  # VFX Platform CY2024 compliance
+  VFX_PLATFORM_YEAR: "2024"
+  PYTHON_VERSION: "3.11.9"
 
 jobs:
   # Code quality checks
@@ -55,14 +58,27 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        rust: [stable, beta]
-        exclude:
-          # Only test beta on Linux to save CI time
-          - os: windows-latest
+        include:
+          # VFX Platform CY2024 compatible environments
+          - os: ubuntu-20.04  # VFX Platform standard
+            rust: stable
+            name: "Ubuntu 20.04 LTS (VFX Platform)"
+          - os: ubuntu-latest  # Latest Ubuntu for future compatibility
+            rust: stable
+            name: "Ubuntu Latest"
+          - os: windows-2022    # Windows 11 compatible
+            rust: stable
+            name: "Windows Server 2022"
+          - os: macos-12        # macOS 12 (Intel)
+            rust: stable
+            name: "macOS 12 (Intel)"
+          - os: macos-14        # macOS 14 (Apple Silicon)
+            rust: stable
+            name: "macOS 14 (Apple Silicon)"
+          # Test with beta Rust on primary VFX platform
+          - os: ubuntu-20.04
             rust: beta
-          - os: macos-latest
-            rust: beta
+            name: "Ubuntu 20.04 LTS (Beta Rust)"
 
     steps:
     - name: Checkout sources
@@ -86,10 +102,10 @@ jobs:
           ${{ runner.os }}-${{ matrix.rust }}-cargo-
           ${{ runner.os }}-cargo-
 
-    - name: Install Python (for integration tests)
+    - name: Install Python (VFX Platform CY2024 standard)
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: ${{ env.PYTHON_VERSION }}
 
     - name: Install uv (for integration tests)
       run: pip install uv
@@ -112,18 +128,27 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          # VFX Platform CY2024 compatible builds
+          - os: ubuntu-20.04
             target: x86_64-unknown-linux-gnu
             artifact_name: rt
             asset_name: rt-linux-x86_64
-          - os: windows-latest
+            name: "Linux x86_64 (VFX Platform)"
+          - os: windows-2022
             target: x86_64-pc-windows-msvc
             artifact_name: rt.exe
             asset_name: rt-windows-x86_64.exe
-          - os: macos-latest
+            name: "Windows x86_64"
+          - os: macos-12
             target: x86_64-apple-darwin
             artifact_name: rt
             asset_name: rt-macos-x86_64
+            name: "macOS Intel x86_64"
+          - os: macos-14
+            target: aarch64-apple-darwin
+            artifact_name: rt
+            asset_name: rt-macos-aarch64
+            name: "macOS Apple Silicon"
 
     steps:
     - name: Checkout sources

@@ -93,19 +93,20 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          # VFX Platform CY2024 compatible release builds
+          - os: ubuntu-20.04
             target: x86_64-unknown-linux-gnu
             artifact_name: rt
             asset_name: rt-linux-x86_64
-          - os: windows-latest
+          - os: windows-2022
             target: x86_64-pc-windows-msvc
             artifact_name: rt.exe
             asset_name: rt-windows-x86_64.exe
-          - os: macos-latest
+          - os: macos-12
             target: x86_64-apple-darwin
             artifact_name: rt
             asset_name: rt-macos-x86_64
-          - os: macos-latest
+          - os: macos-14
             target: aarch64-apple-darwin
             artifact_name: rt
             asset_name: rt-macos-aarch64
@@ -235,10 +236,10 @@ jobs:
       with:
         ref: ${{ needs.version-bump.outputs.tag }}
 
-    - name: Set up Python
+    - name: Set up Python (VFX Platform CY2024)
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: '3.11.9'  # VFX Platform CY2024 specification
 
     - name: Install build dependencies
       run: |
