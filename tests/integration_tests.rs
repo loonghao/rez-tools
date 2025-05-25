@@ -9,7 +9,7 @@ fn test_rt_help() {
     let mut cmd = Command::cargo_bin("rt").unwrap();
     cmd.arg("--help");
     cmd.assert().success().stdout(predicate::str::contains(
-        "A suite tool command line for rez",
+        "A high-performance Rust command-line tool suite for rez package management",
     ));
 }
 
