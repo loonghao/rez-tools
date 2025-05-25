@@ -57,11 +57,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # VFX Platform CY2024 compatible environments
-          - os: ubuntu-20.04  # VFX Platform standard
-            rust: stable
-            name: "Ubuntu 20.04 LTS (VFX Platform)"
-          - os: ubuntu-latest  # Latest Ubuntu for future compatibility
+          # Primary platforms for comprehensive testing
+          - os: ubuntu-latest  # Latest Ubuntu LTS (currently 22.04)
             rust: stable
             name: "Ubuntu Latest"
           - os: windows-2022    # Windows 11 compatible
@@ -71,10 +68,10 @@ jobs:
           - os: macos-latest    # macOS (latest available)
             rust: stable
             name: "macOS Latest"
-          # Test with beta Rust on primary VFX platform
-          - os: ubuntu-20.04
+          # Test with beta Rust on primary platform
+          - os: ubuntu-latest
             rust: beta
-            name: "Ubuntu 20.04 LTS (Beta Rust)"
+            name: "Ubuntu Latest (Beta Rust)"
 
     steps:
     - name: Checkout sources
@@ -117,12 +114,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # VFX Platform CY2024 compatible builds
-          - os: ubuntu-20.04
+          # Primary platform builds
+          - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             artifact_name: rt
             asset_name: rt-linux-x86_64
-            name: "Linux x86_64 (VFX Platform)"
+            name: "Linux x86_64"
           - os: windows-2022
             target: x86_64-pc-windows-msvc
             artifact_name: rt.exe
