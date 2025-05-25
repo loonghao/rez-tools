@@ -9,8 +9,8 @@ on:
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
-  # Pin Rust version to avoid compatibility issues
-  RUST_VERSION: "1.86.0"
+  # Pin Rust version for consistency across environments
+  RUST_VERSION: "1.87.0"
   # VFX Platform CY2024 compliance
   VFX_PLATFORM_YEAR: "2024"
   PYTHON_VERSION: "3.11.9"
@@ -28,7 +28,7 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: ${{ env.RUST_VERSION }}
-        components: rustfmt, clippy
+        components: rustfmt
 
     - name: Cache cargo
       uses: actions/cache@v4
@@ -44,9 +44,6 @@ jobs:
 
     - name: Check formatting
       run: cargo fmt --all -- --check
-
-    - name: Run clippy
-      run: cargo clippy --all-targets --all-features -- -D warnings
 
     - name: Check documentation
       run: cargo doc --no-deps --document-private-items

@@ -342,7 +342,11 @@ python_executable:
 
         // Test finding the executable
         let result = find_python_executable_in_dir(&python_dir);
-        assert!(result.is_ok(), "Should find nested Python executable: {:?}", result.err());
+        assert!(
+            result.is_ok(),
+            "Should find nested Python executable: {:?}",
+            result.err()
+        );
         assert_eq!(result.unwrap(), python_exe);
     }
 
