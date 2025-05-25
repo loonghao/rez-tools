@@ -56,6 +56,10 @@ opt-level = "z"  # Optimize for size
 [profile.dev]
 debug = true
 
+[profile.test]
+debug = true
+opt-level = 0
+
 # Metadata for PyPI distribution
 [package.metadata.python]
 name = "rez-tools"

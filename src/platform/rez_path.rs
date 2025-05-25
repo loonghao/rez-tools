@@ -182,26 +182,38 @@ fn find_rez_in_system_path() -> Result<PathBuf> {
         ("which", "rez")
     };
 
-    let output = std::process::Command::new(cmd)
+    match std::process::Command::new(cmd)
         .arg(arg)
         .output()
-        .map_err(|e| RezToolsError::ConfigError(format!("Failed to run {}: {}", cmd, e)))?;
+    {
+        Ok(output) if output.status.success() => {
+            let output_str = String::from_utf8_lossy(&output.stdout);
+            let path_str = output_str.lines().next().unwrap_or("").trim();
 
-    if output.status.success() {
-        let output_str = String::from_utf8_lossy(&output.stdout);
-        let path_str = output_str.lines().next().unwrap_or("").trim();
-
-        if !path_str.is_empty() {
-            let path = PathBuf::from(path_str);
-            if path.exists() {
-                return Ok(path);
+            if !path_str.is_empty() {
+                let path = PathBuf::from(path_str);
+                if path.exists() {
+                    return Ok(path);
+                }
             }
+
+            Err(RezToolsError::ConfigError(
+                "Rez command found but path does not exist".to_string(),
+            ))
+        }
+        Ok(_) => {
+            debug!("{} command executed but rez not found in PATH", cmd);
+            Err(RezToolsError::ConfigError(
+                "Rez not found in system PATH".to_string(),
+            ))
+        }
+        Err(e) => {
+            debug!("Failed to run {} command: {}", cmd, e);
+            Err(RezToolsError::ConfigError(format!(
+                "Failed to search PATH (command '{}' not available): {}", cmd, e
+            )))
         }
     }
-
-    Err(RezToolsError::ConfigError(
-        "Rez not found in system PATH".to_string(),
-    ))
 }
 
 /// Find rez in common installation locations
@@ -267,11 +279,12 @@ mod tests {
         // We don't assert success/failure since it depends on the system
         match result {
             Ok(path) => {
-                assert!(path.exists());
+                assert!(path.exists(), "Found rez path should exist: {}", path.display());
                 println!("Found rez in system PATH: {}", path.display());
             }
-            Err(_) => {
-                println!("Rez not found in system PATH (expected on some systems)");
+            Err(e) => {
+                println!("Rez not found in system PATH (expected on some systems): {}", e);
+                // This is acceptable - not all systems have rez installed
             }
         }
     }
@@ -280,7 +293,11 @@ mod tests {
     fn test_get_rez_command_python() {
         // Test the case where rez_path is a Python executable
         let temp_dir = TempDir::new().unwrap();
-        let python_exe = temp_dir.path().join("python.exe");
+        let python_exe = if cfg!(windows) {
+            temp_dir.path().join("python.exe")
+        } else {
+            temp_dir.path().join("python3")
+        };
         fs::write(&python_exe, "fake python").unwrap();
 
         // Test the command generation logic directly
@@ -299,7 +316,7 @@ mod tests {
             vec![python_exe.to_string_lossy().to_string()]
         };
 
-        assert_eq!(command.len(), 3);
+        assert_eq!(command.len(), 3, "Python command should have 3 parts");
         assert_eq!(command[0], python_exe.to_string_lossy());
         assert_eq!(command[1], "-m");
         assert_eq!(command[2], "rez");
