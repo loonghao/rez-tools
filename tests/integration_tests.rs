@@ -114,7 +114,7 @@ extension = ".rt"
     // Test plugin --print
     let mut cmd = Command::cargo_bin("rt").unwrap();
     cmd.env("REZ_TOOL_CONFIG", config_file.to_string_lossy().to_string());
-    cmd.args(&["test_tool", "--print"]);
+    cmd.args(["test_tool", "--print"]);
     cmd.assert()
         .success()
         .stdout(predicate::str::contains("command"))

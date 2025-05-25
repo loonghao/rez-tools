@@ -314,7 +314,7 @@ mod tests {
 
         // Check that marker file was created
         let marker_file = scripts_dir.join(".rez_production_install");
-        assert!(marker_file.exists());
+        assert!(tokio::fs::try_exists(&marker_file).await.unwrap());
 
         // Check that it's empty
         let content = tokio::fs::read_to_string(&marker_file).await.unwrap();
@@ -341,7 +341,7 @@ mod tests {
 
         // Check that marker file was created
         let marker_file = bin_dir.join(".rez_production_install");
-        assert!(marker_file.exists());
+        assert!(tokio::fs::try_exists(&marker_file).await.unwrap());
     }
 
     #[tokio::test]
