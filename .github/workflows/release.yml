@@ -87,6 +87,7 @@ jobs:
   build-release:
     name: Build Release
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30  # Add timeout for release builds
     needs: [check-release, version-bump]
     if: needs.check-release.outputs.should_release == 'true'
     strategy:
@@ -102,11 +103,12 @@ jobs:
             target: x86_64-pc-windows-msvc
             artifact_name: rt.exe
             asset_name: rt-windows-x86_64.exe
-          - os: macos-12
+          # Use macos-latest for both architectures to improve resource availability
+          - os: macos-latest
             target: x86_64-apple-darwin
             artifact_name: rt
             asset_name: rt-macos-x86_64
-          - os: macos-14
+          - os: macos-latest
             target: aarch64-apple-darwin
             artifact_name: rt
             asset_name: rt-macos-aarch64
