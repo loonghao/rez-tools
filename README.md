@@ -47,15 +47,7 @@ Download the latest release for your platform from the [releases page](https://g
 
 Extract and place the binary in your PATH.
 
-### Option 2: Install via PyPI
-
-```bash
-pip install rez-tools
-```
-
-This installs the Rust binary through Python packaging, following the uv model.
-
-### Option 3: Build from Source
+### Option 2: Build from Source
 
 ```bash
 git clone https://github.com/loonghao/rez-tools.git

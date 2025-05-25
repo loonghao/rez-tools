@@ -3,11 +3,11 @@ name = "rez-tools"
 version = "1.0.0"
 edition = "2021"
 authors = ["Long Hao <hal.long@outlook.com>"]
-description = "A suite tool command line for rez"
+description = "A high-performance Rust command-line tool suite for rez package management"
 license = "MIT"
 repository = "https://github.com/loonghao/rez-tools"
 readme = "README.md"
-keywords = ["rez", "cli", "tools"]
+keywords = ["rez", "cli", "tools", "rust", "package-management"]
 categories = ["command-line-utilities"]
 
 [[bin]]
@@ -59,10 +59,3 @@ debug = true
 [profile.test]
 debug = true
 opt-level = 0
-
-# Metadata for PyPI distribution
-[package.metadata.python]
-name = "rez-tools"
-module = "rez_tools"
-python-source = "python"
-python-packages = ["rez_tools"]
