@@ -94,8 +94,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # VFX Platform CY2024 compatible release builds
-          - os: ubuntu-20.04
+          # Primary platform release builds
+          - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             artifact_name: rt
             asset_name: rt-linux-x86_64
