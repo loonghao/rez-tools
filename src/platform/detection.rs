@@ -2,7 +2,7 @@ use crate::error::{Result, RezToolsError};
 use crate::platform::RezEnvironment;
 use log::{debug, info, warn};
 use std::env;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 /// Detect existing rez installation
@@ -77,7 +77,7 @@ fn detect_rez_version() -> Result<String> {
 /// Get rez configuration
 fn get_rez_config() -> Result<RezConfig> {
     let output = Command::new("rez")
-        .args(&["config", "--print"])
+        .args(["config", "--print"])
         .output()
         .map_err(|e| RezToolsError::ConfigError(format!("Failed to get rez config: {}", e)))?;
 
@@ -158,7 +158,7 @@ fn detect_standalone_rez_installation() -> Result<RezEnvironment> {
 
     // Check if rez is installed in this Python environment
     let output = Command::new(&python_exe)
-        .args(&["-c", "import rez; print(rez.__version__)"])
+        .args(["-c", "import rez; print(rez.__version__)"])
         .output();
 
     match output {
@@ -188,7 +188,7 @@ fn detect_standalone_rez_installation() -> Result<RezEnvironment> {
 }
 
 /// Find Python executable in a directory
-fn find_python_executable_in_dir(dir: &PathBuf) -> Result<PathBuf> {
+fn find_python_executable_in_dir(dir: &Path) -> Result<PathBuf> {
     use crate::platform::Platform;
 
     let platform = Platform::detect();

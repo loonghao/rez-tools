@@ -44,18 +44,7 @@ tokio-test = "0.4"
 assert_cmd = "2.0"
 predicates = "3.0"
 
-# Multi-platform build targets
-[target.x86_64-pc-windows-gnu]
-linker = "x86_64-w64-mingw32-gcc"
-
-[target.x86_64-unknown-linux-gnu]
-linker = "gcc"
-
-[target.x86_64-apple-darwin]
-linker = "clang"
-
-[target.aarch64-apple-darwin]
-linker = "clang"
+# Multi-platform build targets are handled automatically by Rust toolchain
 
 [profile.release]
 lto = true

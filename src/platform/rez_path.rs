@@ -14,11 +14,9 @@ const REZ_PATH_ENV: &str = "REZ_PATH";
 /// Find and cache the rez executable path
 pub fn find_and_set_rez_path() -> Result<PathBuf> {
     // Check if we already have a cached path
-    if let Some(cached_path) = REZ_PATH_CACHE.get() {
-        if let Some(path) = cached_path {
-            debug!("Using cached rez path: {}", path.display());
-            return Ok(path.clone());
-        }
+    if let Some(Some(path)) = REZ_PATH_CACHE.get() {
+        debug!("Using cached rez path: {}", path.display());
+        return Ok(path.clone());
     }
 
     // Try to find rez path
@@ -41,10 +39,8 @@ pub fn find_and_set_rez_path() -> Result<PathBuf> {
 
 /// Get the cached rez path, or find it if not cached
 pub fn get_rez_path() -> Result<PathBuf> {
-    if let Some(cached_path) = REZ_PATH_CACHE.get() {
-        if let Some(path) = cached_path {
-            return Ok(path.clone());
-        }
+    if let Some(Some(path)) = REZ_PATH_CACHE.get() {
+        return Ok(path.clone());
     }
 
     find_and_set_rez_path()

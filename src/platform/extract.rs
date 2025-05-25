@@ -373,6 +373,6 @@ mod tests {
         let _future = Extractor::extract(&archive_path, &extract_to);
 
         // The future exists, proving the method is static
-        assert!(true);
+        // No assertion needed - the fact that this compiles proves the method is static
     }
 }
