@@ -31,7 +31,7 @@ dirs = "6.0"
 regex = "1.10"
 serde_json = "1.0"
 shell-escape = "0.1"
-toml = "0.8"
+toml = "0.9"
 reqwest = { version = "0.12", features = ["json", "stream"] }
 futures-util = "0.3"
 flate2 = "1.0"
