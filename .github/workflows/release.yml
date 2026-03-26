@@ -156,7 +156,7 @@ jobs:
       shell: bash
 
     - name: Upload release artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: ${{ matrix.asset_name }}
         path: ${{ matrix.asset_name }}.${{ matrix.os == 'windows-latest' && 'zip' || 'tar.gz' }}
@@ -209,7 +209,7 @@ jobs:
         echo "* **macOS (Apple Silicon)**: rt-macos-aarch64.tar.gz" >> release_notes.md
 
     - name: Download all release artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         path: release-artifacts/
 
